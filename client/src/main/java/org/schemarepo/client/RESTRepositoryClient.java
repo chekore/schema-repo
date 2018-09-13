@@ -136,6 +136,7 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
     return subjectList;
   }
 
+  @Override
   public String getStatus() {
     return auxWebResource.path("status").accept(MediaType.TEXT_PLAIN_TYPE).get(String.class);
   }

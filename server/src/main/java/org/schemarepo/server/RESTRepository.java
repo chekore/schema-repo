@@ -22,6 +22,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.schemarepo.MessageStrings;
+import org.schemarepo.Repository;
+import org.schemarepo.SchemaEntry;
+import org.schemarepo.SchemaValidationException;
+import org.schemarepo.Subject;
+import org.schemarepo.SubjectConfig;
+
+import com.sun.jersey.api.NotFoundException;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -34,14 +43,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.schemarepo.MessageStrings;
-import org.schemarepo.Repository;
-import org.schemarepo.SchemaEntry;
-import org.schemarepo.SchemaValidationException;
-import org.schemarepo.Subject;
-import org.schemarepo.SubjectConfig;
-
-import com.sun.jersey.api.NotFoundException;
 
 /**
  * {@link RESTRepository} Is a JSR-311 REST Interface to a {@link Repository}.
@@ -129,9 +130,9 @@ public abstract class RESTRepository extends BaseRESTRepository {
       return Response.status(400).build();
     }
     SubjectConfig.Builder builder = new SubjectConfig.Builder();
-    for(Map.Entry<String, List<String>> entry : configParams.entrySet()) {
+    for (Map.Entry<String, List<String>> entry : configParams.entrySet()) {
       List<String> val = entry.getValue();
-      if(val.size() > 0) {
+      if (val.size() > 0) {
         builder.set(entry.getKey(), val.get(0));
       }
     }
@@ -165,9 +166,8 @@ public abstract class RESTRepository extends BaseRESTRepository {
    */
   @GET
   @Path("{subject}/id/{id}")
-  public String schemaFromId(@HeaderParam("Accept") String mediaType,
-                             @PathParam("subject") String subject, @PathParam("id") String id)
-  {
+  public String schemaFromId(@HeaderParam("Accept") String mediaType, @PathParam("subject") String subject,
+    @PathParam("id") String id) {
     return getRenderer(mediaType).renderSchemaEntry(exists(getSubject(subject).lookupById(id)), false);
   }
 
@@ -184,8 +184,12 @@ public abstract class RESTRepository extends BaseRESTRepository {
   @POST
   @Path("{subject}/schema")
   @Consumes(MediaType.TEXT_PLAIN)
-  public String idFromSchema(@PathParam("subject") String subject, String schema) {
-    return exists(getSubject(subject).lookupBySchema(schema)).getId();
+  public Response idFromSchema(@PathParam("subject") String subject, String schema) {
+    try {
+      return Response.ok(exists(getSubject(subject).lookupBySchema(schema)).getId()).build();
+    } catch (IllegalArgumentException e) {
+      return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+    }
   }
 
   /**
@@ -229,8 +233,8 @@ public abstract class RESTRepository extends BaseRESTRepository {
   @PUT
   @Path("{subject}/register_if_latest/{latestId: .*}")
   @Consumes(MediaType.TEXT_PLAIN)
-  public Response addSchema(@PathParam("subject") String subject,
-      @PathParam("latestId") String latestId, String schema) {
+  public Response addSchema(@PathParam("subject") String subject, @PathParam("latestId") String latestId,
+    String schema) {
     Subject s = getSubject(subject);
     SchemaEntry latest;
     if ("".equals(latestId)) {
@@ -285,5 +289,4 @@ public abstract class RESTRepository extends BaseRESTRepository {
     }
     return entry;
   }
-
 }

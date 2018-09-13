@@ -156,6 +156,7 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
     }
   }
 
+  @Override
   protected Subject getSubjectInstance(final String subjectName) {
     return new ZooKeeperSubject(subjectName);
   }
