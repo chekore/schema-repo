@@ -25,14 +25,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+
 /**
  * A factory for mapping Validator names to instantiated instances. Validator
  * names starting with "repo."
  */
 public class ValidatorFactory {
 
-  public static final String REJECT_VALIDATOR = "repo.reject";
-  public static final ValidatorFactory EMPTY = new Builder().build();
+  static final String REJECT_VALIDATOR = "repo.reject";
+  static final ValidatorFactory EMPTY = new Builder().build();
 
   private final HashMap<String, Validator> validators;
   private final Set<String> defaultSubjectValidators;
@@ -61,19 +62,15 @@ public class ValidatorFactory {
   public final Set<String> getDefaultSubjectValidators() {
     HashSet<String> result = new HashSet<String>(defaultSubjectValidators.size());
     for (String name : defaultSubjectValidators) {
-      if (validators.containsKey(name))
+      if (validators.containsKey(name)) {
         result.add(name);
+      }
     }
     return result;
   }
 
   public static class Builder {
     private final HashMap<String, Validator> validators;
-    {
-      validators = new HashMap<String, Validator>();
-      validators.put(REJECT_VALIDATOR, new Reject());
-    }
-
     private final Set<String> defaultSubjectValidators = new HashSet<String>();
 
     /**
@@ -83,8 +80,8 @@ public class ValidatorFactory {
      */
     public Builder setValidator(String name, Validator validator) {
       if (name.startsWith("repo.")) {
-        throw new RuntimeException("Validator names starting with 'repo.'"
-            + " are reserved.  Attempted to set validator with name: " + name);
+        throw new RuntimeException(
+          "Validator names starting with 'repo.'" + " are reserved.  Attempted to set validator with name: " + name);
       }
       validators.put(name, validator);
       return this;
@@ -103,16 +100,21 @@ public class ValidatorFactory {
     }
 
     public ValidatorFactory build() {
-      return new ValidatorFactory(new HashMap<String, Validator>(validators), new HashSet<String>(defaultSubjectValidators));
+      return new ValidatorFactory(new HashMap<String, Validator>(validators),
+        new HashSet<String>(defaultSubjectValidators));
+    }
+
+    {
+      validators = new HashMap<String, Validator>();
+      validators.put(REJECT_VALIDATOR, new Reject());
     }
   }
 
   private static class Reject implements Validator {
     @Override
-    public void validate(String schemaToValidate,
-        Iterable<SchemaEntry> schemasInOrder) throws SchemaValidationException {
-      throw new SchemaValidationException(
-          "repo.validator.reject validator always rejects validation");
+    public void validate(String schemaToValidate, Iterable<SchemaEntry> schemasInOrder)
+      throws SchemaValidationException {
+      throw new SchemaValidationException("repo.validator.reject validator always rejects validation");
     }
   }
 }

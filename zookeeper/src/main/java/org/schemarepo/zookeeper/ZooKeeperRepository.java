@@ -31,9 +31,6 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -50,6 +47,10 @@ import org.schemarepo.SubjectConfig;
 import org.schemarepo.ValidatorFactory;
 import org.schemarepo.config.Config;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
+
 /**
  * This {@link org.schemarepo.Repository} implementation stores its state using Zookeeper.
  * <p/>
@@ -62,25 +63,28 @@ import org.schemarepo.config.Config;
  */
 public class ZooKeeperRepository extends AbstractBackendRepository {
 
-  // Constants
+  /**
+   * Constants
+   */
   private static final String LOCKFILE = ".repo.lock";
   private static final String SUBJECT_PROPERTIES = "subject.properties";
   private static final String SCHEMA_IDS = "schema_ids";
   private static final String SCHEMA_POSTFIX = ".schema";
 
-  // Curator implementation details
+  /**
+   * Curator implementation detail
+   */
   CuratorFramework zkClient;
   InterProcessSemaphoreMutex zkLock;
 
   @Inject
   public ZooKeeperRepository(@Named(Config.ZK_ENSEMBLE) String zkEnsemble,
-                             @Named(Config.ZK_PATH_PREFIX) String zkPathPrefix,
-                             @Named(Config.ZK_SESSION_TIMEOUT) Integer zkSessionTimeout,
-                             @Named(Config.ZK_CONNECTION_TIMEOUT) Integer zkConnectionTimeout,
-                             @Named(Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES) Integer curatorSleepTimeBetweenRetries,
-                             @Named(Config.ZK_CURATOR_NUMBER_OF_RETRIES) Integer curatorNumberOfRetries,
-                             ValidatorFactory validators)
-  {
+    @Named(Config.ZK_PATH_PREFIX) String zkPathPrefix,
+    @Named(Config.ZK_SESSION_TIMEOUT) Integer zkSessionTimeout,
+    @Named(Config.ZK_CONNECTION_TIMEOUT) Integer zkConnectionTimeout,
+    @Named(Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES) Integer curatorSleepTimeBetweenRetries,
+    @Named(Config.ZK_CURATOR_NUMBER_OF_RETRIES) Integer curatorNumberOfRetries,
+    ValidatorFactory validators) {
     super(validators);
 
     if (zkEnsemble == null || zkEnsemble.isEmpty()) {
@@ -88,21 +92,18 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       System.exit(1);
     }
 
-    logger.info("Starting ZookeeperRepository with the following parameters:\n" +
-            Config.ZK_ENSEMBLE + ": " + zkEnsemble + "\n" +
-            Config.ZK_PATH_PREFIX + ": " + zkPathPrefix + "\n" +
-            Config.ZK_SESSION_TIMEOUT + ": " + zkSessionTimeout + "\n" +
-            Config.ZK_CONNECTION_TIMEOUT + ": " + zkConnectionTimeout + "\n" +
-            Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES + ": " + curatorSleepTimeBetweenRetries + "\n" +
-            Config.ZK_CURATOR_NUMBER_OF_RETRIES + ": " + curatorNumberOfRetries);
+    logger.info("Starting ZookeeperRepository with the following parameters:\n"
+      + Config.ZK_ENSEMBLE + ": " + zkEnsemble + "\n"
+      + Config.ZK_PATH_PREFIX + ": " + zkPathPrefix + "\n"
+      + Config.ZK_SESSION_TIMEOUT + ": " + zkSessionTimeout + "\n"
+      + Config.ZK_CONNECTION_TIMEOUT + ": " + zkConnectionTimeout + "\n"
+      + Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES + ": " + curatorSleepTimeBetweenRetries + "\n"
+      + Config.ZK_CURATOR_NUMBER_OF_RETRIES + ": " + curatorNumberOfRetries);
 
     RetryPolicy retryPolicy = new RetryNTimes(curatorSleepTimeBetweenRetries, curatorNumberOfRetries);
-    CuratorFrameworkFactory.Builder cffBuilder = CuratorFrameworkFactory.builder()
-            .connectString(zkEnsemble)
-            .sessionTimeoutMs(zkSessionTimeout)
-            .connectionTimeoutMs(zkConnectionTimeout)
-            .retryPolicy(retryPolicy)
-            .defaultData(new byte[0]);
+    CuratorFrameworkFactory.Builder cffBuilder =
+      CuratorFrameworkFactory.builder().connectString(zkEnsemble).sessionTimeoutMs(zkSessionTimeout)
+        .connectionTimeoutMs(zkConnectionTimeout).retryPolicy(retryPolicy).defaultData(new byte[0]);
 
     // This temporary CuratorFramework is not namespaced and is only used to ensure the zkPathPrefix is properly initialized
     CuratorFramework tempCuratorFramework = cffBuilder.build();
@@ -115,7 +116,8 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
     } catch (KeeperException.NodeExistsException e) {
       logger.info("The ZK Path Prefix ({}) was found in ZK.", zkPathPrefix);
     } catch (IllegalArgumentException e) {
-      logger.error("Got an IllegalArgumentException while attempting to create the ZK Path Prefix (" + zkPathPrefix + "). Exiting.", e);
+      logger.error("Got an IllegalArgumentException while attempting to create the ZK Path Prefix (" + zkPathPrefix
+        + "). Exiting.", e);
       System.exit(1);
     } catch (Exception e) {
       logger.error("There was an unrecoverable exception during the ZooKeeperRepository startup. Exiting.", e);
@@ -180,7 +182,6 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       props.store(sw, "Schema Repository Subject Properties");
       byte[] content = sw.toString().getBytes();
       zkClient.create().forPath(subjectName + "/" + SUBJECT_PROPERTIES, content);
-
     } catch (KeeperException.NodeExistsException e) {
       // The Subject was already created by another repository instance, we will
       // just fetch it, below, instead of creating a new one.
@@ -238,13 +239,14 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
    * @throws java.io.IOException if an I/O error occurs
    */
   @Override
-  public void close() throws IOException {
-    Integer waitTime = 100;
+  public void close()
+    throws IOException {
+    int waitTime = 100;
     while (true) {
       if (zkLock.isAcquiredInThisProcess()) {
         try {
-          logger.info("ZooKeeperRepository's close() called while lock is acquired. " +
-                  "Waiting " + waitTime + " ms before trying again.");
+          logger.info("ZooKeeperRepository's close() called while lock is acquired. " + "Waiting " + waitTime
+            + " ms before trying again.");
           wait(waitTime);
         } catch (InterruptedException e) {
           logger.warn("Interrupted while waiting", e);
@@ -274,41 +276,39 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
     return properties;
   }
 
-
   private class ZooKeeperSubject extends Subject {
     //private final SubjectConfig config;
+    private final String endOfLine = System.getProperty("line.separator");
 
     /**
      * A {@link org.schemarepo.Subject} has a name. The name must not be null or empty, and
      * cannot contain whitespace. If the name contains whitespace an
      * {@link IllegalArgumentException} is thrown.
      */
-    protected ZooKeeperSubject(String subjectName) {
+    ZooKeeperSubject(String subjectName) {
       super(subjectName);
 
       try {
         if (zkClient.checkExists().forPath(subjectName) == null) {
           throw new RuntimeException("The Subject does not exist in ZK!");
         }
-          Set<String> schemaFileNames = getSchemaFiles();
-          Set<Integer> foundIds = new HashSet<Integer>();
-          for (Integer id : getSchemaIds()) {
-            if(!foundIds.add(id)) {
-              throw new RuntimeException("Corrupt id file, id '" + id +
-                      "' duplicated in " + getSchemaIdsFilePath());
-            }
-            //fileReadable(getSchemaFile(id));
-            schemaFileNames.remove(getSchemaFileName(id));
+        Set<String> schemaFileNames = getSchemaFiles();
+        Set<Integer> foundIds = new HashSet<Integer>();
+        for (Integer id : getSchemaIds()) {
+          if (!foundIds.add(id)) {
+            throw new RuntimeException("Corrupt id file, id '" + id + "' duplicated in " + getSchemaIdsFilePath());
           }
-          if (schemaFileNames.size() > 0) {
-            throw new RuntimeException("Schema files found in subject directory "
-                    + getSubjectPath()
-                    + " that are not referenced in the " + SCHEMA_IDS + " file: "
-                    + schemaFileNames.toString());
-          }
+          //fileReadable(getSchemaFile(id));
+          schemaFileNames.remove(getSchemaFileName(id));
+        }
+        if (schemaFileNames.size() > 0) {
+          throw new RuntimeException(
+            "Schema files found in subject directory " + getSubjectPath() + " that are not referenced in the "
+              + SCHEMA_IDS + " file: " + schemaFileNames.toString());
+        }
       } catch (IOException e) {
-        throw new RuntimeException("An IOException occurred while reading the properties at: " +
-                getConfigFilePath(), e);
+        throw new RuntimeException("An IOException occurred while reading the properties at: " + getConfigFilePath(),
+          e);
       } catch (Exception e) {
         throw new RuntimeException("An exception occurred while accessing ZK!", e);
       }
@@ -345,7 +345,7 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
         // hammered too much at the expense of slightly stale data.
         List<String> filesInSubject = zkClient.getChildren().forPath(getSubjectPath());
         Set<String> schemaFiles = new HashSet<String>();
-        for (String fileName: filesInSubject) {
+        for (String fileName : filesInSubject) {
           if (fileName.endsWith(SCHEMA_POSTFIX)) {
             schemaFiles.add(fileName);
           }
@@ -356,8 +356,10 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       }
     }
 
-    // schema ids from the schema id file, in order from oldest to newest
-    private List<Integer> getSchemaIds(){
+    /**
+     * schema ids from the schema id file, in order from oldest to newest
+     */
+    private List<Integer> getSchemaIds() {
       // TODO: Make IDs String across the board (not Integer),
       // TODO: Add pluggable ID generation schemes
       try {
@@ -419,14 +421,12 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       }
     }
 
-    private final String endOfLine = System.getProperty("line.separator");
-
     private String serializeSchemaIds(List<Integer> schemaIds) {
       // TODO: Make IDs String across the board (not Integer),
       // TODO: Add pluggable ID generation schemes
       StringBuilder sb = new StringBuilder();
       boolean firstLine = true;
-      for (Integer id: schemaIds) {
+      for (Integer id : schemaIds) {
         if (firstLine) {
           firstLine = false;
         } else {
@@ -448,16 +448,15 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
         byte[] newSchemaIdsFile = serializeSchemaIds(allSchemaIds).getBytes();
         // Create new schema and update schema IDs file in one ZK transaction
         zkClient.inTransaction().
-                create().forPath(getSchemaFilePath(newId.toString()), newSchemaFile).
-                and().
-                setData().forPath(getSchemaIdsFilePath(), newSchemaIdsFile).
-                and().commit();
+          create().forPath(getSchemaFilePath(newId.toString()), newSchemaFile).
+          and().
+          setData().forPath(getSchemaIdsFilePath(), newSchemaIdsFile).
+          and().commit();
 
-          // TODO: Keep new schema in a local cache
-          return new SchemaEntry(String.valueOf(newId), schema);
+        // TODO: Keep new schema in a local cache
+        return new SchemaEntry(String.valueOf(newId), schema);
       } catch (Exception e) {
-        throw new RuntimeException(
-                "An exception occurred while accessing ZK!", e);
+        throw new RuntimeException("An exception occurred while accessing ZK!", e);
       }
     }
 
@@ -512,9 +511,11 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
      *          of the subject
      */
     @Override
-    public SchemaEntry register(String schema) throws SchemaValidationException {
+    public SchemaEntry register(String schema)
+      throws SchemaValidationException {
       RepositoryUtil.validateSchemaOrSubject(schema);
-      SchemaEntry cachedSchema = null; // TODO: lookup within local cache first
+      // TODO: lookup within local cache first
+      SchemaEntry cachedSchema = null;
       if (cachedSchema != null) {
         return cachedSchema;
       } else {
@@ -541,10 +542,12 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
      *          of the subject
      */
     @Override
-    public SchemaEntry registerIfLatest(String schema, SchemaEntry latest) throws SchemaValidationException {
+    public SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
+      throws SchemaValidationException {
       SchemaEntry latestInZk = latest();
-      if (latest == latestInZk // both null
-              || (latest != null && latest.equals(latestInZk))) {
+      // both null
+      if (latest == latestInZk
+        || (latest != null && latest.equals(latestInZk))) {
         return register(schema);
       } else {
         return null;
@@ -582,7 +585,8 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
      */
     @Override
     public SchemaEntry lookupById(String id) {
-      SchemaEntry cachedSchema = null; // TODO: lookup within local cache first
+      // TODO: lookup within local cache first
+      SchemaEntry cachedSchema = null;
       if (cachedSchema != null) {
         return cachedSchema;
       } else {
@@ -605,8 +609,10 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
     public SchemaEntry latest() {
       // TODO: Make IDs String across the board (not Integer),
       // TODO: Add pluggable ID generation schemes
-      Integer latestId = getLatestSchemaId(); // This part is not cacheable
-      SchemaEntry cachedSchema = null; // TODO: lookup within local cache first
+      // This part is not cacheable
+      Integer latestId = getLatestSchemaId();
+      // TODO: lookup within local cache first
+      SchemaEntry cachedSchema = null;
       if (cachedSchema != null) {
         return cachedSchema;
       } else {
