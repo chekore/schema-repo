@@ -87,7 +87,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- version properties for dependencies -->
-    <jetty-9.version>9.4.12.v20180830</jetty-9.version>
+    <jetty-9.version>8.2.0.v20160908</jetty-9.version>
     <jersey.version>1.19.4</jersey.version>
     <guice.version>4.2.0</guice.version>
     <junit.version>4.12</junit.version>
