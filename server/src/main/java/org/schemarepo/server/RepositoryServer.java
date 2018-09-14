@@ -24,10 +24,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpServlet;
-
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
@@ -47,6 +43,11 @@ import com.google.inject.Provides;
 import com.google.inject.servlet.GuiceFilter;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
+
+import javax.inject.Named;
+import javax.inject.Singleton;
+import javax.servlet.http.HttpServlet;
+
 
 /**
  * A {@link RepositoryServer} is a stand-alone server for running a
@@ -78,19 +79,18 @@ public class RepositoryServer {
     if (Boolean.parseBoolean(props.getProperty(julPropName, Config.getDefault(julPropName)))) {
       final String slf4jBridgeHandlerName = "org.slf4j.bridge.SLF4JBridgeHandler";
       try {
-        final Class<?> slf4jBridgeHandler = Class.forName(slf4jBridgeHandlerName, true,
-            Thread.currentThread().getContextClassLoader());
+        final Class<?> slf4jBridgeHandler =
+          Class.forName(slf4jBridgeHandlerName, true, Thread.currentThread().getContextClassLoader());
         slf4jBridgeHandler.getMethod("removeHandlersForRootLogger").invoke(null);
         slf4jBridgeHandler.getMethod("install").invoke(null);
         logger.info("Routing java.util.logging traffic through SLF4J");
       } catch (Exception e) {
-        logger.error(
-            "Failed to install {}, java.util.logging is unaffected. Perhaps you need to add {}",
-            slf4jBridgeHandlerName, julToSlf4jDep, e);
+        logger.error("Failed to install {}, java.util.logging is unaffected. Perhaps you need to add {}",
+          slf4jBridgeHandlerName, julToSlf4jDep, e);
       }
     } else {
-      logger.info(
-          "java.util.logging is NOT routed through SLF4J. Set {} property to true and add {} if you want otherwise",
+      logger
+        .info("java.util.logging is NOT routed through SLF4J. Set {} property to true and add {} if you want otherwise",
           julPropName, julToSlf4jDep);
     }
 
@@ -98,7 +98,8 @@ public class RepositoryServer {
     this.server = injector.getInstance(Server.class);
   }
 
-  public static void main(String... args) throws Exception {
+  public static void main(String... args)
+    throws Exception {
     if (args.length != 1) {
       printHelp();
       System.exit(1);
@@ -120,22 +121,25 @@ public class RepositoryServer {
     }
   }
 
-  public void start() throws Exception {
+  private static void printHelp() {
+    System.err
+      .println("One argument expected containing a configuration " + "properties file.  Default properties are:");
+    ConfigModule.printDefaults(System.err);
+  }
+
+  public void start()
+    throws Exception {
     server.start();
   }
 
-  public void join() throws InterruptedException {
+  private void join()
+    throws InterruptedException {
     server.join();
   }
 
-  public void stop() throws Exception {
+  public void stop()
+    throws Exception {
     server.stop();
-  }
-
-  private static void printHelp() {
-    System.err.println("One argument expected containing a configuration "
-        + "properties file.  Default properties are:");
-    ConfigModule.printDefaults(System.err);
   }
 
   /**
@@ -148,6 +152,7 @@ public class RepositoryServer {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Repository repo;
     private final Integer gracefulShutdown;
+
     ShutDownListener(Repository repo, Integer gracefulShutdown) {
       this.repo = repo;
       this.gracefulShutdown = gracefulShutdown;
@@ -155,9 +160,9 @@ public class RepositoryServer {
 
     @Override
     public void lifeCycleStopped(LifeCycle event) {
-      logger.info("Waited {} ms to drain requests before closing the repo and exiting. " +
-              "This wait time can be adjusted with the {} config property.",
-              gracefulShutdown, Config.JETTY_GRACEFUL_SHUTDOWN);
+      logger.info("Waited {} ms to drain requests before closing the repo and exiting. "
+          + "This wait time can be adjusted with the {} config property.", gracefulShutdown,
+        Config.JETTY_GRACEFUL_SHUTDOWN);
 
       try {
         repo.close();
@@ -181,17 +186,11 @@ public class RepositoryServer {
 
     @Provides
     @Singleton
-    public Server provideServer(
-        @Named(Config.JETTY_HOST) String host,
-        @Named(Config.JETTY_PORT) Integer port,
-        @Named(Config.JETTY_HEADER_SIZE) Integer headerSize,
-        @Named(Config.JETTY_BUFFER_SIZE) Integer bufferSize,
-        @Named(Config.JETTY_STOP_AT_SHUTDOWN) Boolean stopAtShutdown,
-        @Named(Config.JETTY_GRACEFUL_SHUTDOWN) Integer gracefulShutdown,
-        Repository repo,
-        Connector connector,
-        GuiceFilter guiceFilter,
-        ServletContextHandler handler) {
+    public Server provideServer(@Named(Config.JETTY_HOST) String host, @Named(Config.JETTY_PORT) Integer port,
+      @Named(Config.JETTY_HEADER_SIZE) Integer headerSize, @Named(Config.JETTY_BUFFER_SIZE) Integer bufferSize,
+      @Named(Config.JETTY_STOP_AT_SHUTDOWN) Boolean stopAtShutdown,
+      @Named(Config.JETTY_GRACEFUL_SHUTDOWN) Integer gracefulShutdown, Repository repo, Connector connector,
+      GuiceFilter guiceFilter, ServletContextHandler handler) {
 
       Server server = new Server();
       if (null != host && !host.isEmpty()) {
@@ -200,7 +199,7 @@ public class RepositoryServer {
       connector.setPort(port);
       connector.setRequestHeaderSize(headerSize);
       connector.setRequestBufferSize(bufferSize);
-      server.setConnectors(new Connector[] { connector });
+      server.setConnectors(new Connector[]{connector});
 
       // the guice filter intercepts all inbound requests and uses its bindings
       // for servlets
@@ -220,5 +219,4 @@ public class RepositoryServer {
       private static final long serialVersionUID = 4560115319373180139L;
     }
   }
-
 }
