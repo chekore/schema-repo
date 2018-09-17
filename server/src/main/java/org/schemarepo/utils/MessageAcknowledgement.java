@@ -1,13 +1,9 @@
 package org.schemarepo.utils;
 
-import org.codehaus.jackson.annotate.JsonTypeName;
-
-
 /**
  * @author zhizhou.ren
  * @param <E>
  */
-@JsonTypeName
 public class MessageAcknowledgement<E> {
   private int code;
   private String message;
