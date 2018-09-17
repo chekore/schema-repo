@@ -79,12 +79,10 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
 
   @Inject
   public ZooKeeperRepository(@Named(Config.ZK_ENSEMBLE) String zkEnsemble,
-    @Named(Config.ZK_PATH_PREFIX) String zkPathPrefix,
-    @Named(Config.ZK_SESSION_TIMEOUT) Integer zkSessionTimeout,
+    @Named(Config.ZK_PATH_PREFIX) String zkPathPrefix, @Named(Config.ZK_SESSION_TIMEOUT) Integer zkSessionTimeout,
     @Named(Config.ZK_CONNECTION_TIMEOUT) Integer zkConnectionTimeout,
     @Named(Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES) Integer curatorSleepTimeBetweenRetries,
-    @Named(Config.ZK_CURATOR_NUMBER_OF_RETRIES) Integer curatorNumberOfRetries,
-    ValidatorFactory validators) {
+    @Named(Config.ZK_CURATOR_NUMBER_OF_RETRIES) Integer curatorNumberOfRetries, ValidatorFactory validators) {
     super(validators);
 
     if (zkEnsemble == null || zkEnsemble.isEmpty()) {
@@ -92,13 +90,12 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       System.exit(1);
     }
 
-    logger.info("Starting ZookeeperRepository with the following parameters:\n"
-      + Config.ZK_ENSEMBLE + ": " + zkEnsemble + "\n"
-      + Config.ZK_PATH_PREFIX + ": " + zkPathPrefix + "\n"
-      + Config.ZK_SESSION_TIMEOUT + ": " + zkSessionTimeout + "\n"
-      + Config.ZK_CONNECTION_TIMEOUT + ": " + zkConnectionTimeout + "\n"
-      + Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES + ": " + curatorSleepTimeBetweenRetries + "\n"
-      + Config.ZK_CURATOR_NUMBER_OF_RETRIES + ": " + curatorNumberOfRetries);
+    logger.info(
+      "Starting ZookeeperRepository with the following parameters:\n" + Config.ZK_ENSEMBLE + ": " + zkEnsemble + "\n"
+        + Config.ZK_PATH_PREFIX + ": " + zkPathPrefix + "\n" + Config.ZK_SESSION_TIMEOUT + ": " + zkSessionTimeout
+        + "\n" + Config.ZK_CONNECTION_TIMEOUT + ": " + zkConnectionTimeout + "\n"
+        + Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES + ": " + curatorSleepTimeBetweenRetries + "\n"
+        + Config.ZK_CURATOR_NUMBER_OF_RETRIES + ": " + curatorNumberOfRetries);
 
     RetryPolicy retryPolicy = new RetryNTimes(curatorSleepTimeBetweenRetries, curatorNumberOfRetries);
     CuratorFrameworkFactory.Builder cffBuilder =
@@ -506,13 +503,9 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
      *
      * @param schema The schema to register
      * @return The id of the schema
-     * @throws org.schemarepo.SchemaValidationException
-     *          If the schema change is not valid according the validation rules
-     *          of the subject
      */
     @Override
-    public SchemaEntry register(String schema)
-      throws SchemaValidationException {
+    public SchemaEntry register(String schema) {
       RepositoryUtil.validateSchemaOrSubject(schema);
       // TODO: lookup within local cache first
       SchemaEntry cachedSchema = null;
@@ -546,8 +539,7 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       throws SchemaValidationException {
       SchemaEntry latestInZk = latest();
       // both null
-      if (latest == latestInZk
-        || (latest != null && latest.equals(latestInZk))) {
+      if (latest == latestInZk || (latest != null && latest.equals(latestInZk))) {
         return register(schema);
       } else {
         return null;

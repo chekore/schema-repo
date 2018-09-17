@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.schemarepo.MessageStrings;
 import org.schemarepo.Repository;
 import org.schemarepo.SchemaEntry;
@@ -29,6 +30,7 @@ import org.schemarepo.SchemaValidationException;
 import org.schemarepo.Subject;
 import org.schemarepo.SubjectConfig;
 import org.schemarepo.utils.MessageAcknowledgement;
+import org.schemarepo.utils.StatusCodes;
 
 import com.sun.jersey.api.NotFoundException;
 
@@ -127,9 +129,10 @@ public abstract class RESTRepository extends BaseRESTRepository {
   @POST
   @Path("{subject}")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response createSubject(@PathParam("subject") String subject, MultivaluedMap<String, String> configParams) {
-    if (null == subject) {
-      return Response.status(400).build();
+    if (StringUtils.isAnyBlank(subject)) {
+      return Response.status(StatusCodes.INVALID_REQUEST).build();
     }
     SubjectConfig.Builder builder = new SubjectConfig.Builder();
     for (Map.Entry<String, List<String>> entry : configParams.entrySet()) {
@@ -138,8 +141,17 @@ public abstract class RESTRepository extends BaseRESTRepository {
         builder.set(entry.getKey(), val.get(0));
       }
     }
-    Subject created = repo.register(subject, builder.build());
-    return Response.ok(created.getName()).build();
+    MessageAcknowledgement<String> acknowledgement;
+    try {
+      Subject created = repo.register(subject, builder.build());
+      acknowledgement =
+        new MessageAcknowledgement<String>(StatusCodes.CREATED.getStatusCode(), StatusCodes.CREATED.getReasonPhrase(),
+          created.getName());
+    } catch (Exception e) {
+      acknowledgement =
+        new MessageAcknowledgement<String>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
+    }
+    return Response.ok(acknowledgement).build();
   }
 
   /**
@@ -202,7 +214,7 @@ public abstract class RESTRepository extends BaseRESTRepository {
    * @param schema
    *          The schema to register
    * @return A 200 response with the corresponding id if successful,
-   *         a 403 forbidden response with exception message if the schema fails validation,
+   *         a 400 invalid response with exception message if the schema fails validation,
    *         or a 404 not found response if the subject does not exist
    */
   @POST
@@ -210,16 +222,24 @@ public abstract class RESTRepository extends BaseRESTRepository {
   @Consumes(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response addSchema(@PathParam("subject") String subject, String schema) {
-    try {
-      MessageAcknowledgement<String> acknowledgement =
-        new MessageAcknowledgement<String>(Status.CREATED.getStatusCode(), Status.CREATED.getReasonPhrase(),
-          getSubject(subject).register(schema).getId());
-      logger.info("Register a schema with {} is successful.", subject);
-      return Response.ok(acknowledgement).build();
-    } catch (SchemaValidationException e) {
-      logger.error("Register a schema with {} is failed, err: {}", subject, e.getMessage());
-      return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+    MessageAcknowledgement<String> acknowledgement;
+    if (StringUtils.isAnyBlank(subject, schema)) {
+      logger.error("Invalid Parameter Passed to function, subject: {}, schema: {}", subject, schema);
+      acknowledgement = new MessageAcknowledgement<String>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+        StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
+    } else {
+      try {
+        acknowledgement =
+          new MessageAcknowledgement<String>(StatusCodes.CREATED.getStatusCode(), StatusCodes.CREATED.getReasonPhrase(),
+            getSubject(subject).register(schema).getId());
+        logger.info("Register a schema with {} is successful.", subject);
+      } catch (Exception e) {
+        logger.error("Register a schema with {} is failed, err: {}", subject, e.getMessage());
+        acknowledgement =
+          new MessageAcknowledgement<String>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
+      }
     }
+    return Response.ok(acknowledgement).build();
   }
 
   /**
