@@ -214,9 +214,9 @@ public abstract class RESTRepository extends BaseRESTRepository {
       MessageAcknowledgement<String> acknowledgement =
         new MessageAcknowledgement<String>(Status.OK.getStatusCode(), Status.OK.getReasonPhrase(),
           getSubject(subject).register(schema).getId());
-      return Response.ok(acknowledgement, CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON).build();
+      return Response.ok(acknowledgement).build();
     } catch (SchemaValidationException e) {
-      return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+      return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
     }
   }
 

@@ -22,6 +22,8 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.jetty.server.Connector;
@@ -177,8 +179,11 @@ public class RepositoryServer {
 
     @Override
     protected void configureServlets() {
+      Map<String, String> initParams = new HashMap<String, String>(2);
+      initParams.put("com.sun.jersey.config.feature.Trace", "true");
+      initParams.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
       bind(Connector.class).to(SelectChannelConnector.class);
-      serve("/*").with(GuiceContainer.class);
+      serve("/*").with(GuiceContainer.class, initParams);
       bind(MachineOrientedRESTRepository.class);
       bind(HumanOrientedRESTRepository.class);
       bind(AuxiliaryRESTRepository.class);
