@@ -93,7 +93,7 @@ public class RepositoryServer {
         .info("java.util.logging is NOT routed through SLF4J. Set {} property to true and add {} if you want otherwise",
           julPropName, julToSlf4jDep);
     }
-
+    props.setProperty("com.sun.jersey.api.json.POJOMappingFeature", "true");
     Injector injector = Guice.createInjector(new ConfigModule(props), new ServerModule());
     this.server = injector.getInstance(Server.class);
   }
@@ -186,14 +186,11 @@ public class RepositoryServer {
 
     @Provides
     @Singleton
-    public Server provideServer(
-      @Named(Config.JETTY_HOST) String host,
-      @Named(Config.JETTY_PORT) Integer port,
-      @Named(Config.JETTY_HEADER_SIZE) Integer headerSize,
-      @Named(Config.JETTY_BUFFER_SIZE) Integer bufferSize,
+    public Server provideServer(@Named(Config.JETTY_HOST) String host, @Named(Config.JETTY_PORT) Integer port,
+      @Named(Config.JETTY_HEADER_SIZE) Integer headerSize, @Named(Config.JETTY_BUFFER_SIZE) Integer bufferSize,
       @Named(Config.JETTY_STOP_AT_SHUTDOWN) Boolean stopAtShutdown,
-      @Named(Config.JETTY_GRACEFUL_SHUTDOWN) Integer gracefulShutdown,
-      Repository repo, Connector connector, GuiceFilter guiceFilter, ServletContextHandler handler) {
+      @Named(Config.JETTY_GRACEFUL_SHUTDOWN) Integer gracefulShutdown, Repository repo, Connector connector,
+      GuiceFilter guiceFilter, ServletContextHandler handler) {
 
       Server server = new Server();
       if (null != host && !host.isEmpty()) {
