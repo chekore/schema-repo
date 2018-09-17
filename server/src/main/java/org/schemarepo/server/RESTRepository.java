@@ -214,10 +214,10 @@ public abstract class RESTRepository extends BaseRESTRepository {
       MessageAcknowledgement<String> acknowledgement =
         new MessageAcknowledgement<String>(Status.CREATED.getStatusCode(), Status.CREATED.getReasonPhrase(),
           getSubject(subject).register(schema).getId());
-      logger.info("Register a schema with %s is successful.", subject);
+      logger.info("Register a schema with {} is successful.", subject);
       return Response.ok(acknowledgement).build();
     } catch (SchemaValidationException e) {
-      logger.error("Register a schema with %s is failed, err: %s.", subject, e.getMessage());
+      logger.error("Register a schema with {} is failed, err: {}", subject, e.getMessage());
       return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
     }
   }
