@@ -1,13 +1,13 @@
 package org.schemarepo.utils;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 
 /**
  * @author zhizhou.ren
  * @param <E>
  */
-@XmlRootElement
+@JsonTypeName
 public class MessageAcknowledgement<E> {
   private int code;
   private String message;
