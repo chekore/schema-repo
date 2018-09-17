@@ -70,7 +70,7 @@ public class TestRESTRepository {
 
   @Test(expected=NotFoundException.class)
   public void testNonExistentSubjectList() throws Exception {
-    repo.allSchemaEntries("nothing");
+    repo.allSchemaEntries(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON,"nothing");
   }
 
   @Test(expected=NotFoundException.class)

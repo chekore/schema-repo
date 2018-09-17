@@ -97,11 +97,16 @@ public abstract class RESTRepository extends BaseRESTRepository {
    */
   @GET
   @Path("{subject}/all")
-  @Consumes(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
-  public Response allSchemaEntries(@PathParam("subject") String subject) {
+  public Response allSchemaEntries(@HeaderParam("Content-Type") String contentType,
+    @PathParam("subject") String subject) {
     MessageAcknowledgement<List> acknowledgement;
-    if (StringUtils.isAnyBlank(subject)) {
+    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(contentType)) {
+      logger.error("Content-Type is not set correctly, subject: {}", subject);
+      acknowledgement =
+        new MessageAcknowledgement<List>(StatusCodes.INVALID_REQUEST.getStatusCode(), MessageStrings.CONTENT_TYPE_ERROR,
+          null);
+    } else if (StringUtils.isAnyBlank(subject)) {
       logger.error("Invalid Parameter Passed to function, subject: {}", subject);
       acknowledgement = new MessageAcknowledgement<List>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
