@@ -116,6 +116,7 @@ public abstract class RESTRepository extends BaseRESTRepository {
         s.allEntries().forEach(sl::add);
         acknowledgement =
           new MessageAcknowledgement<List>(StatusCodes.OK.getStatusCode(), StatusCodes.OK.getReasonPhrase(), sl);
+        logger.info("Query all schema in the subject is successful. subject: {}", subject);
       }
     }
     return Response.ok(acknowledgement).build();
