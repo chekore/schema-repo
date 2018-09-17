@@ -18,6 +18,7 @@
 
 package org.schemarepo.server;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +113,7 @@ public abstract class RESTRepository extends BaseRESTRepository {
         acknowledgement = new MessageAcknowledgement<List>(StatusCodes.NOT_FOUND.getStatusCode(),
           MessageStrings.SUBJECT_DOES_NOT_EXIST_ERROR, null);
       } else {
-        List<String> sl = Collections.emptyList();
+        List<String> sl = new ArrayList<>();
         s.allEntries().forEach(a -> System.out.println(a.getSchema()));
         s.allEntries().forEach(tmp -> sl.add(tmp.getSchema()));
         acknowledgement =
