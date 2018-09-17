@@ -28,6 +28,7 @@ import org.schemarepo.SchemaEntry;
 import org.schemarepo.SchemaValidationException;
 import org.schemarepo.Subject;
 import org.schemarepo.SubjectConfig;
+import org.schemarepo.utils.MessageAcknowledgement;
 
 import com.sun.jersey.api.NotFoundException;
 
@@ -210,7 +211,10 @@ public abstract class RESTRepository extends BaseRESTRepository {
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response addSchema(@PathParam("subject") String subject, String schema) {
     try {
-      return Response.ok(getSubject(subject).register(schema).getId()).build();
+      MessageAcknowledgement<String> acknowledgement =
+        new MessageAcknowledgement<String>(Status.OK.getStatusCode(), Status.OK.getReasonPhrase(),
+          getSubject(subject).register(schema).getId());
+      return Response.ok(acknowledgement).build();
     } catch (SchemaValidationException e) {
       return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
     }
