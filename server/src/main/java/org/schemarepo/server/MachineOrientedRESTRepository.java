@@ -20,13 +20,14 @@ package org.schemarepo.server;
 
 import java.util.Arrays;
 
-import javax.ws.rs.Path;
-
 import org.schemarepo.Repository;
 import org.schemarepo.json.JsonUtil;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import javax.ws.rs.Path;
+
 
 /**
  * Subclass of {@link org.schemarepo.server.RESTRepository} which supports machine-oriented rendering
@@ -43,7 +44,6 @@ public class MachineOrientedRESTRepository extends RESTRepository {
    */
   @Inject
   public MachineOrientedRESTRepository(Repository repo, JsonUtil jsonUtil) {
-    super(repo, Arrays.asList(new PlainTextRenderer(), new JsonRenderer(jsonUtil)));
+    super(repo, Arrays.asList(new PlainTextRenderer(), new JsonRenderer(jsonUtil), new SchemaJsonRenderer(jsonUtil)));
   }
-
 }

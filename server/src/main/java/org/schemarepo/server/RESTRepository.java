@@ -249,15 +249,12 @@ public abstract class RESTRepository extends BaseRESTRepository {
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
       try {
-        if (new Schema.Parser().parse(schema).isError()) {
-          logger.error("Not a legal schema syntax, suject: {}, schema: {}", subject, schema);
-          acknowledgement = new MessageAcknowledgement<String>(StatusCodes.INVALID_REQUEST.getStatusCode(),
-            MessageStrings.SCHEMA_IS_NOT_LEGAL_SYNTAX, null);
-        } else {
-          acknowledgement = new MessageAcknowledgement<String>(StatusCodes.CREATED.getStatusCode(),
-            StatusCodes.CREATED.getReasonPhrase(), getSubject(subject).register(schema).getId());
-          logger.info("Register a schema with {} is successful.", subject);
-        }
+        // Verifying schema
+        new Schema.Parser().parse(schema);
+        acknowledgement =
+          new MessageAcknowledgement<String>(StatusCodes.CREATED.getStatusCode(), StatusCodes.CREATED.getReasonPhrase(),
+            getSubject(subject).register(schema).getId());
+        logger.info("Register a schema with {} is successful.", subject);
       } catch (Exception e) {
         logger.error("Register a schema with {} is failed, err: {}", subject, e.getMessage());
         acknowledgement =
