@@ -38,6 +38,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -122,7 +123,7 @@ public abstract class RESTRepository extends BaseRESTRepository {
    * @return the subject name in a 200 response if successful.
    *         HTTP 404 if the subject does not exist, or HTTP 409 if there was a conflict creating the subject
    */
-  @PUT
+  @POST
   @Path("{subject}")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   public Response createSubject(@PathParam("subject") String subject, MultivaluedMap<String, String> configParams) {
@@ -183,7 +184,7 @@ public abstract class RESTRepository extends BaseRESTRepository {
    */
   @POST
   @Path("{subject}/schema")
-  @Consumes(MediaType.TEXT_PLAIN)
+  @Consumes(MediaType.APPLICATION_JSON)
   public Response idFromSchema(@PathParam("subject") String subject, String schema) {
     try {
       return Response.ok(exists(getSubject(subject).lookupBySchema(schema)).getId()).build();
@@ -203,9 +204,10 @@ public abstract class RESTRepository extends BaseRESTRepository {
    *         a 403 forbidden response with exception message if the schema fails validation,
    *         or a 404 not found response if the subject does not exist
    */
-  @PUT
+  @POST
   @Path("{subject}/register")
-  @Consumes(MediaType.TEXT_PLAIN)
+  @Consumes(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
+  @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response addSchema(@PathParam("subject") String subject, String schema) {
     try {
       return Response.ok(getSubject(subject).register(schema).getId()).build();
