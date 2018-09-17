@@ -93,7 +93,7 @@ public class RepositoryServer {
         .info("java.util.logging is NOT routed through SLF4J. Set {} property to true and add {} if you want otherwise",
           julPropName, julToSlf4jDep);
     }
-    props.setProperty("com.sun.jersey.api.json.POJOMappingFeature", "true");
+
     Injector injector = Guice.createInjector(new ConfigModule(props), new ServerModule());
     this.server = injector.getInstance(Server.class);
   }
@@ -208,6 +208,7 @@ public class RepositoryServer {
       handler.addServlet(NoneServlet.class, "/");
       handler.setContextPath("/");
       handler.addLifeCycleListener(new ShutDownListener(repo, gracefulShutdown));
+      handler.getServletContext().setInitParameter("com.sun.jersey.api.json.POJOMappingFeature","true");
       server.setHandler(handler);
       server.dumpStdErr();
       server.setStopAtShutdown(stopAtShutdown);
