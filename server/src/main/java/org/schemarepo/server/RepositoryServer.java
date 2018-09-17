@@ -180,6 +180,7 @@ public class RepositoryServer {
     @Override
     protected void configureServlets() {
       Map<String, String> initParams = new HashMap<String, String>(1);
+      // initParams.put("com.sun.jersey.config.feature.Trace", "true");
       initParams.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
       bind(Connector.class).to(SelectChannelConnector.class);
       serve("/*").with(GuiceContainer.class, initParams);
