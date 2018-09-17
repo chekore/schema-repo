@@ -112,8 +112,9 @@ public abstract class RESTRepository extends BaseRESTRepository {
         acknowledgement = new MessageAcknowledgement<List>(StatusCodes.NOT_FOUND.getStatusCode(),
           MessageStrings.SUBJECT_DOES_NOT_EXIST_ERROR, null);
       } else {
-        List<SchemaEntry> sl = Collections.emptyList();
-        s.allEntries().forEach(sl::add);
+        List<String> sl = Collections.emptyList();
+        s.allEntries().forEach(a -> System.out.println(a.getSchema()));
+        s.allEntries().forEach(tmp -> sl.add(tmp.getSchema()));
         acknowledgement =
           new MessageAcknowledgement<List>(StatusCodes.OK.getStatusCode(), StatusCodes.OK.getReasonPhrase(), sl);
       }
