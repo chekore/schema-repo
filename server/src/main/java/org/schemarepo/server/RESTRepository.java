@@ -18,6 +18,7 @@
 
 package org.schemarepo.server;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -99,21 +100,22 @@ public abstract class RESTRepository extends BaseRESTRepository {
   @Consumes(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response allSchemaEntries(@PathParam("subject") String subject) {
-    MessageAcknowledgement<String> acknowledgement;
+    MessageAcknowledgement<List> acknowledgement;
     if (StringUtils.isAnyBlank(subject)) {
       logger.error("Invalid Parameter Passed to function, subject: {}", subject);
-      acknowledgement = new MessageAcknowledgement<String>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+      acknowledgement = new MessageAcknowledgement<List>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
       Subject s = repo.lookup(subject);
       if (null == s) {
-        acknowledgement = new MessageAcknowledgement<String>(StatusCodes.NOT_FOUND.getStatusCode(),
+        logger.error("This subject does not exist, suject: {}", subject);
+        acknowledgement = new MessageAcknowledgement<List>(StatusCodes.NOT_FOUND.getStatusCode(),
           MessageStrings.SUBJECT_DOES_NOT_EXIST_ERROR, null);
       } else {
-        Renderer renderer = getRenderer(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON);
+        List sl = Collections.emptyList();
+        s.allEntries().forEach(a -> sl.add(a));
         acknowledgement =
-          new MessageAcknowledgement<String>(StatusCodes.OK.getStatusCode(), StatusCodes.OK.getReasonPhrase(),
-            renderer.renderSchemas(s.allEntries()));
+          new MessageAcknowledgement<List>(StatusCodes.OK.getStatusCode(), StatusCodes.OK.getReasonPhrase(), sl);
       }
     }
     return Response.ok(acknowledgement).build();
