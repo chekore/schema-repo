@@ -18,11 +18,6 @@
 
 package org.schemarepo.client;
 
-import static com.sun.jersey.api.client.ClientResponse.Status.CONFLICT;
-import static com.sun.jersey.api.client.ClientResponse.Status.FORBIDDEN;
-import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
-import static java.lang.String.format;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -32,11 +27,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.schemarepo.BaseRepository;
 import org.schemarepo.RepositoryUtil;
@@ -55,6 +45,17 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.representation.Form;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import static com.sun.jersey.api.client.ClientResponse.Status.CONFLICT;
+import static com.sun.jersey.api.client.ClientResponse.Status.FORBIDDEN;
+import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
+import static java.lang.String.format;
+
 
 /**
  * An Implementation of {@link org.schemarepo.Repository} that connects to a remote RESTRepository over HTTP.<br/>
@@ -79,12 +80,11 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
 
   @Inject
   public RESTRepositoryClient(@Named(Config.CLIENT_SERVER_URL) String url,
-                              @Named(Config.JSON_UTIL_IMPLEMENTATION) JsonUtil jsonUtil,
-                              @Named(Config.CLIENT_RETURN_NONE_ON_EXCEPTIONS) boolean returnNoneOnExceptions)
-  {
+    @Named(Config.JSON_UTIL_IMPLEMENTATION) JsonUtil jsonUtil,
+    @Named(Config.CLIENT_RETURN_NONE_ON_EXCEPTIONS) boolean returnNoneOnExceptions) {
     logger.info(format("Pointing to schema-repo server at %s", url));
     logger.info(format("Remote exceptions from GET requests will be %s",
-            returnNoneOnExceptions ? "swallowed and an 'empty' value returned" : "propagated to the caller"));
+      returnNoneOnExceptions ? "swallowed and an 'empty' value returned" : "propagated to the caller"));
     this.webResource = Client.create().resource(url);
     try {
       this.auxWebResource = Client.create().resource(new URI(url + "/..").normalize());
@@ -98,11 +98,12 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
   @Override
   public Subject register(String subject, SubjectConfig config) {
     Form form = new Form();
-    for(Map.Entry<String, String> entry : RepositoryUtil.safeConfig(config).asMap().entrySet()) {
+    for (Map.Entry<String, String> entry : RepositoryUtil.safeConfig(config).asMap().entrySet()) {
       form.putSingle(entry.getKey(), entry.getValue());
     }
 
-    String regSubjectName = webResource.path(subject).type(MediaType.APPLICATION_FORM_URLENCODED).put(String.class, form);
+    String regSubjectName =
+      webResource.path(subject).type(MediaType.APPLICATION_FORM_URLENCODED).put(String.class, form);
 
     return new RESTSubject(regSubjectName);
   }
@@ -124,9 +125,7 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
   public Iterable<Subject> subjects() {
     ArrayList<Subject> subjectList = new ArrayList<Subject>();
     try {
-      String subjects = webResource
-              .accept(MediaType.APPLICATION_JSON)
-              .get(String.class);
+      String subjects = webResource.accept(MediaType.APPLICATION_JSON).get(String.class);
       for (String subjName : jsonUtil.subjectNamesFromJson(subjects)) {
         subjectList.add(new RESTSubject(subjName));
       }
@@ -144,8 +143,8 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
   public Properties getConfiguration(final boolean includeDefaults) {
     final Properties properties = new Properties();
     try {
-      final String propsData = auxWebResource.path("config")
-          .queryParam("includeDefaults", String.valueOf(includeDefaults))
+      final String propsData =
+        auxWebResource.path("config").queryParam("includeDefaults", String.valueOf(includeDefaults))
           .accept(MediaType.TEXT_PLAIN_TYPE).get(String.class);
       properties.load(new StringReader(propsData));
     } catch (Exception e) {
@@ -161,6 +160,23 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
     return properties;
   }
 
+  private void handleException(Exception ex, String msg, boolean resourceNotFoundExpected) {
+    final ClientResponse.Status status =
+      ex instanceof UniformInterfaceException ? ((UniformInterfaceException) ex).getResponse().getClientResponseStatus()
+        : null;
+    if (status == NOT_FOUND && resourceNotFoundExpected || status == CONFLICT) {
+      logger.debug(msg, ex);
+    } else if (returnNoneOnExceptions) {
+      if (status != null && status.getFamily() == Response.Status.Family.CLIENT_ERROR) {
+        logger.info(msg, ex);
+      } else {
+        logger.error(msg, ex);
+      }
+    } else {
+      throw ex instanceof RuntimeException ? (RuntimeException) ex : new RuntimeException(msg, ex);
+    }
+  }
+
   private class RESTSubject extends Subject {
 
     private RESTSubject(String name) {
@@ -169,7 +185,7 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
 
     @Override
     public SubjectConfig getConfig() {
-      String path = getName() + "/config" ;
+      String path = getName() + "/config";
       SubjectConfig config = null;
       try {
         String propString = webResource.path(path).get(String.class);
@@ -185,26 +201,27 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
     }
 
     @Override
-    public SchemaEntry register(String schema) throws SchemaValidationException {
+    public SchemaEntry register(String schema)
+      throws SchemaValidationException {
       RepositoryUtil.validateSchemaOrSubject(schema);
       String path = getName() + "/register";
       return handleRegisterRequest(path, schema, false);
     }
 
     @Override
-    public SchemaEntry registerIfLatest(String schema, SchemaEntry latest) throws SchemaValidationException {
+    public SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
+      throws SchemaValidationException {
       RepositoryUtil.validateSchemaOrSubject(schema);
       String idStr = (latest == null) ? "" : latest.getId();
       String path = getName() + "/register_if_latest/" + idStr;
       return handleRegisterRequest(path, schema, true);
     }
 
-    private SchemaEntry handleRegisterRequest(String path, String schema, boolean resourceNotFoundExpected) throws SchemaValidationException {
+    private SchemaEntry handleRegisterRequest(String path, String schema, boolean resourceNotFoundExpected)
+      throws SchemaValidationException {
       SchemaEntry schemaEntry = null;
       try {
-        String schemaId = webResource.path(path)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .put(String.class, schema);
+        String schemaId = webResource.path(path).type(MediaType.TEXT_PLAIN_TYPE).put(String.class, schema);
         schemaEntry = new SchemaEntry(schemaId, schema);
       } catch (UniformInterfaceException e) {
         ClientResponse cr = e.getResponse();
@@ -212,7 +229,8 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
           throw new SchemaValidationException("Invalid schema: " + schema + ". Reason: " + cr.getEntity(String.class));
         } else {
           //any other status should return null
-          handleException(e, format("Failed to register new schema for subject %s", getName()), resourceNotFoundExpected);
+          handleException(e, format("Failed to register new schema for subject %s", getName()),
+            resourceNotFoundExpected);
         }
       } catch (ClientHandlerException e) {
         handleException(e, format("Failed to register new schema for subject %s", getName()), resourceNotFoundExpected);
@@ -266,9 +284,7 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
       String path = getName() + "/all";
       Iterable<SchemaEntry> entries = Collections.emptyList();
       try {
-        String entriesStr = webResource.path(path)
-                .accept(MediaType.APPLICATION_JSON)
-                .get(String.class);
+        String entriesStr = webResource.path(path).accept(MediaType.APPLICATION_JSON).get(String.class);
         entries = jsonUtil.schemasFromJson(entriesStr);
       } catch (RuntimeException e) {
         handleException(e, format("Failed to retrieve all schema entries in subject %s", getName()), false);
@@ -287,24 +303,5 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
       }
       return integral;
     }
-
   }
-
-
-  private void handleException(Exception ex, String msg, boolean resourceNotFoundExpected) {
-    final ClientResponse.Status status = ex instanceof UniformInterfaceException ?
-        ((UniformInterfaceException)ex).getResponse().getClientResponseStatus() : null;
-    if (status == NOT_FOUND && resourceNotFoundExpected || status == CONFLICT) {
-      logger.debug(msg, ex);
-    } else if (returnNoneOnExceptions) {
-      if (status != null && status.getFamily() == Response.Status.Family.CLIENT_ERROR) {
-        logger.info(msg, ex);
-      } else {
-        logger.error(msg, ex);
-      }
-    } else {
-      throw ex instanceof RuntimeException ? (RuntimeException)ex : new RuntimeException(msg, ex);
-    }
-  }
-
 }
