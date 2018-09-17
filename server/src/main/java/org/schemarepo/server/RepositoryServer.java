@@ -208,7 +208,6 @@ public class RepositoryServer {
       handler.addServlet(NoneServlet.class, "/");
       handler.setContextPath("/");
       handler.addLifeCycleListener(new ShutDownListener(repo, gracefulShutdown));
-      handler.getServletContext().setInitParameter("com.sun.jersey.api.json.POJOMappingFeature","true");
       server.setHandler(handler);
       server.dumpStdErr();
       server.setStopAtShutdown(stopAtShutdown);
