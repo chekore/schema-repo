@@ -1,8 +1,5 @@
 package org.schemarepo.utils;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-
 /**
  * @author zhizhou.ren
  * @param <E>
