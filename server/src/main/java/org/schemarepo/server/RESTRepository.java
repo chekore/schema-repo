@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.schemarepo.MessageStrings;
 import org.schemarepo.Repository;
@@ -95,13 +96,27 @@ public abstract class RESTRepository extends BaseRESTRepository {
    */
   @GET
   @Path("{subject}/all")
-  public Response allSchemaEntries(@HeaderParam("Accept") String mediaType, @PathParam("subject") String subject) {
-    Subject s = repo.lookup(subject);
-    if (null == s) {
-      throw new NotFoundException(MessageStrings.SUBJECT_DOES_NOT_EXIST_ERROR);
+  @Consumes(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
+  @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
+  public Response allSchemaEntries(@PathParam("subject") String subject) {
+    MessageAcknowledgement<String> acknowledgement;
+    if (StringUtils.isAnyBlank(subject)) {
+      logger.error("Invalid Parameter Passed to function, subject: {}", subject);
+      acknowledgement = new MessageAcknowledgement<String>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+        StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
+    } else {
+      Subject s = repo.lookup(subject);
+      if (null == s) {
+        acknowledgement = new MessageAcknowledgement<String>(StatusCodes.NOT_FOUND.getStatusCode(),
+          MessageStrings.SUBJECT_DOES_NOT_EXIST_ERROR, null);
+      } else {
+        Renderer renderer = getRenderer(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON);
+        acknowledgement =
+          new MessageAcknowledgement<String>(StatusCodes.OK.getStatusCode(), StatusCodes.OK.getReasonPhrase(),
+            renderer.renderSchemas(s.allEntries()));
+      }
     }
-    Renderer renderer = getRenderer(mediaType);
-    return Response.ok(renderer.renderSchemas(s.allEntries()), renderer.getMediaType()).build();
+    return Response.ok(acknowledgement).build();
   }
 
   @GET
@@ -124,32 +139,37 @@ public abstract class RESTRepository extends BaseRESTRepository {
    * @param configParams
    *          the configuration values for the Subject, as form parameters
    * @return the subject name in a 200 response if successful.
-   *         HTTP 404 if the subject does not exist, or HTTP 409 if there was a conflict creating the subject
+   *         HTTP 412 if the subject does not exist, or if there was a conflict creating the subject
    */
   @POST
   @Path("{subject}")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response createSubject(@PathParam("subject") String subject, MultivaluedMap<String, String> configParams) {
-    if (StringUtils.isAnyBlank(subject)) {
-      return Response.status(StatusCodes.INVALID_REQUEST).build();
-    }
-    SubjectConfig.Builder builder = new SubjectConfig.Builder();
-    for (Map.Entry<String, List<String>> entry : configParams.entrySet()) {
-      List<String> val = entry.getValue();
-      if (val.size() > 0) {
-        builder.set(entry.getKey(), val.get(0));
-      }
-    }
     MessageAcknowledgement<String> acknowledgement;
-    try {
-      Subject created = repo.register(subject, builder.build());
-      acknowledgement =
-        new MessageAcknowledgement<String>(StatusCodes.CREATED.getStatusCode(), StatusCodes.CREATED.getReasonPhrase(),
-          created.getName());
-    } catch (Exception e) {
-      acknowledgement =
-        new MessageAcknowledgement<String>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
+    if (StringUtils.isAnyBlank(subject)) {
+      logger.error("Invalid Parameter Passed to function, subject: {}, configParams: {}", subject, configParams);
+      acknowledgement = new MessageAcknowledgement<String>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+        StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
+    } else {
+      SubjectConfig.Builder builder = new SubjectConfig.Builder();
+      for (Map.Entry<String, List<String>> entry : configParams.entrySet()) {
+        List<String> val = entry.getValue();
+        if (val.size() > 0) {
+          builder.set(entry.getKey(), val.get(0));
+        }
+      }
+      try {
+        Subject created = repo.register(subject, builder.build());
+        acknowledgement =
+          new MessageAcknowledgement<String>(StatusCodes.CREATED.getStatusCode(), StatusCodes.CREATED.getReasonPhrase(),
+            created.getName());
+        logger.info("Create the subject is successful. subject: {}", subject);
+      } catch (Exception e) {
+        logger.error("Create the subject is failed. subject: {}, err: ", subject, e.getMessage());
+        acknowledgement =
+          new MessageAcknowledgement<String>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
+      }
     }
     return Response.ok(acknowledgement).build();
   }
@@ -229,10 +249,15 @@ public abstract class RESTRepository extends BaseRESTRepository {
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
       try {
-        acknowledgement =
-          new MessageAcknowledgement<String>(StatusCodes.CREATED.getStatusCode(), StatusCodes.CREATED.getReasonPhrase(),
-            getSubject(subject).register(schema).getId());
-        logger.info("Register a schema with {} is successful.", subject);
+        if (new Schema.Parser().parse(schema).isError()) {
+          logger.error("Not a legal schema syntax, suject: {}, schema: {}", subject, schema);
+          acknowledgement = new MessageAcknowledgement<String>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+            MessageStrings.SCHEMA_IS_NOT_LEGAL_SYNTAX, null);
+        } else {
+          acknowledgement = new MessageAcknowledgement<String>(StatusCodes.CREATED.getStatusCode(),
+            StatusCodes.CREATED.getReasonPhrase(), getSubject(subject).register(schema).getId());
+          logger.info("Register a schema with {} is successful.", subject);
+        }
       } catch (Exception e) {
         logger.error("Register a schema with {} is failed, err: {}", subject, e.getMessage());
         acknowledgement =

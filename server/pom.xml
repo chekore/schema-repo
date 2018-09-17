@@ -89,6 +89,11 @@
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <version>${avro.version}</version>
+    </dependency>
     <!-- to include logback-test.xml, otherwise the production logback.xml is used when running tests -->
     <dependency>
       <groupId>org.schemarepo</groupId>
