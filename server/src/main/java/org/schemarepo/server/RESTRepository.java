@@ -100,11 +100,11 @@ public class RESTRepository extends BaseRESTRepository {
   public Response allSchemaEntries(@HeaderParam("Accept") String accept, @PathParam("subject") String subject) {
     MessageAcknowledgement<List> acknowledgement;
     if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
-      logger.error("Accept is not set correctly, subject: {}", subject);
+      logger.error("Accept is not set correctly, Method: allSchemaEntries, subject: {}", subject);
       acknowledgement =
         new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
     } else if (StringUtils.isAnyBlank(subject)) {
-      logger.error("Invalid Parameter Passed to function, subject: {}", subject);
+      logger.error("Invalid Parameter Passed to function, Method: allSchemaEntries, subject: {}", subject);
       acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
@@ -155,11 +155,11 @@ public class RESTRepository extends BaseRESTRepository {
     MultivaluedMap<String, String> configParams) {
     MessageAcknowledgement<String> acknowledgement;
     if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
-      logger.error("Accept is not set correctly, subject: {}", subject);
+      logger.error("Accept is not set correctly, Method: createSubject, subject: {}", subject);
       acknowledgement =
         new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
     } else if (StringUtils.isAnyBlank(subject)) {
-      logger.error("Invalid Parameter Passed to function, subject: {}, configParams: {}", subject, configParams);
+      logger.error("Invalid Parameter Passed to function, Method: createSubject, subject: {}, configParams: {}", subject, configParams);
       acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
@@ -256,11 +256,11 @@ public class RESTRepository extends BaseRESTRepository {
   public Response addSchema(@HeaderParam("Accept") String accept, @PathParam("subject") String subject, String schema) {
     MessageAcknowledgement<String> acknowledgement;
     if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
-      logger.error("Accept is not set correctly, subject: {}", subject);
+      logger.error("Accept is not set correctly, Method: addSchema, subject: {}", subject);
       acknowledgement =
         new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
     } else if (StringUtils.isAnyBlank(subject, schema)) {
-      logger.error("Invalid Parameter Passed to function, subject: {}, schema: {}", subject, schema);
+      logger.error("Invalid Parameter Passed to function, Method: addSchema, subject: {}, schema: {}", subject, schema);
       acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
@@ -304,11 +304,11 @@ public class RESTRepository extends BaseRESTRepository {
     @PathParam("latestId") String latestId, String schema) {
     MessageAcknowledgement<String> acknowledgement;
     if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
-      logger.error("Accept is not set correctly, subject: {}", subject);
+      logger.error("Accept is not set correctly, Method: addSchema/register_if_latest, subject: {}", subject);
       acknowledgement =
         new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
     } else if (StringUtils.isAnyBlank(subject, schema)) {
-      logger.error("Invalid Parameter Passed to function, subject: {}, schema: {}", subject, schema);
+      logger.error("Invalid Parameter Passed to function, Method: addSchema/register_if_latest, subject: {}, schema: {}", subject, schema);
       acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
@@ -356,11 +356,11 @@ public class RESTRepository extends BaseRESTRepository {
   public Response checkSubject(@HeaderParam("Accept") String accept, @PathParam("subject") String subject) {
     MessageAcknowledgement<String> acknowledgement;
     if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
-      logger.error("Accept is not set correctly, subject: {}", subject);
+      logger.error("Accept is not set correctly, Method: checkSubject, subject: {}", subject);
       acknowledgement =
         new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
     } else if (StringUtils.isAnyBlank(subject)) {
-      logger.error("Invalid Parameter Passed to function, subject: {}", subject);
+      logger.error("Invalid Parameter Passed to function, Method: checkSubject, subject: {}", subject);
       acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
