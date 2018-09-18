@@ -25,10 +25,9 @@ import java.util.Properties;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.schemarepo.MessageStrings;
+import org.schemarepo.Message;
 import org.schemarepo.Repository;
 import org.schemarepo.SchemaEntry;
-import org.schemarepo.SchemaValidationException;
 import org.schemarepo.Subject;
 import org.schemarepo.SubjectConfig;
 import org.schemarepo.utils.MessageAcknowledgement;
@@ -60,7 +59,7 @@ import javax.ws.rs.core.Response.Status;
  * handle media types differently and are accessible via different paths, though the actual functionality of
  * accessing the underlying repository server is contained in this class.
  */
-public abstract class RESTRepository extends BaseRESTRepository {
+public class RESTRepository extends BaseRESTRepository {
 
   /**
    * Create a {@link RESTRepository} that wraps a given {@link Repository}
@@ -103,23 +102,23 @@ public abstract class RESTRepository extends BaseRESTRepository {
     if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
       logger.error("Accept is not set correctly, subject: {}", subject);
       acknowledgement =
-        new MessageAcknowledgement<List>(StatusCodes.INVALID_REQUEST.getStatusCode(), MessageStrings.CONTENT_TYPE_ERROR,
-          null);
+        new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
     } else if (StringUtils.isAnyBlank(subject)) {
       logger.error("Invalid Parameter Passed to function, subject: {}", subject);
-      acknowledgement = new MessageAcknowledgement<List>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+      acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
       Subject s = repo.lookup(subject);
       if (null == s) {
         logger.error("This subject does not exist, suject: {}", subject);
-        acknowledgement = new MessageAcknowledgement<List>(StatusCodes.NOT_FOUND.getStatusCode(),
-          MessageStrings.SUBJECT_DOES_NOT_EXIST_ERROR, null);
+        acknowledgement =
+          new MessageAcknowledgement<>(StatusCodes.NOT_FOUND.getStatusCode(), Message.SUBJECT_DOES_NOT_EXIST_ERROR,
+            null);
       } else {
         List<SchemaEntry> sl = new ArrayList<>();
         s.allEntries().forEach(sl::add);
         acknowledgement =
-          new MessageAcknowledgement<List>(StatusCodes.OK.getStatusCode(), StatusCodes.OK.getReasonPhrase(), sl);
+          new MessageAcknowledgement<>(StatusCodes.OK.getStatusCode(), StatusCodes.OK.getReasonPhrase(), sl);
         logger.info("Query all schema in the subject is successful. subject: {}", subject);
       }
     }
@@ -131,7 +130,7 @@ public abstract class RESTRepository extends BaseRESTRepository {
   public String subjectConfig(@HeaderParam("Accept") String mediaType, @PathParam("subject") String subject) {
     Subject s = repo.lookup(subject);
     if (null == s) {
-      throw new NotFoundException(MessageStrings.SUBJECT_DOES_NOT_EXIST_ERROR);
+      throw new NotFoundException(Message.SUBJECT_DOES_NOT_EXIST_ERROR);
     }
     Properties props = new Properties();
     props.putAll(s.getConfig().asMap());
@@ -152,11 +151,16 @@ public abstract class RESTRepository extends BaseRESTRepository {
   @Path("{subject}")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
-  public Response createSubject(@PathParam("subject") String subject, MultivaluedMap<String, String> configParams) {
+  public Response createSubject(@HeaderParam("Accept") String accept, @PathParam("subject") String subject,
+    MultivaluedMap<String, String> configParams) {
     MessageAcknowledgement<String> acknowledgement;
-    if (StringUtils.isAnyBlank(subject)) {
+    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
+      logger.error("Accept is not set correctly, subject: {}", subject);
+      acknowledgement =
+        new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
+    } else if (StringUtils.isAnyBlank(subject)) {
       logger.error("Invalid Parameter Passed to function, subject: {}, configParams: {}", subject, configParams);
-      acknowledgement = new MessageAcknowledgement<String>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+      acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
       SubjectConfig.Builder builder = new SubjectConfig.Builder();
@@ -169,13 +173,13 @@ public abstract class RESTRepository extends BaseRESTRepository {
       try {
         Subject created = repo.register(subject, builder.build());
         acknowledgement =
-          new MessageAcknowledgement<String>(StatusCodes.CREATED.getStatusCode(), StatusCodes.CREATED.getReasonPhrase(),
+          new MessageAcknowledgement<>(StatusCodes.CREATED.getStatusCode(), StatusCodes.CREATED.getReasonPhrase(),
             created.getName());
         logger.info("Create the subject is successful. subject: {}", subject);
       } catch (Exception e) {
         logger.error("Create the subject is failed. subject: {}, err: ", subject, e.getMessage());
         acknowledgement =
-          new MessageAcknowledgement<String>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
+          new MessageAcknowledgement<>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
       }
     }
     return Response.ok(acknowledgement).build();
@@ -192,7 +196,7 @@ public abstract class RESTRepository extends BaseRESTRepository {
   @GET
   @Path("{subject}/latest")
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
-  public String latest(@HeaderParam("Content-Type") String mediaType, @PathParam("subject") String subject) {
+  public String latest(@HeaderParam("Accept") String mediaType, @PathParam("subject") String subject) {
     return getRenderer(mediaType).renderSchemaEntry(exists(getSubject(subject).latest()), true);
   }
 
@@ -225,7 +229,7 @@ public abstract class RESTRepository extends BaseRESTRepository {
    */
   @POST
   @Path("{subject}/schema")
-  @Consumes(MediaType.APPLICATION_JSON)
+  @Consumes(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response idFromSchema(@PathParam("subject") String subject, String schema) {
     try {
       return Response.ok(exists(getSubject(subject).lookupBySchema(schema)).getId()).build();
@@ -249,24 +253,28 @@ public abstract class RESTRepository extends BaseRESTRepository {
   @Path("{subject}/register")
   @Consumes(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
-  public Response addSchema(@PathParam("subject") String subject, String schema) {
+  public Response addSchema(@HeaderParam("Accept") String accept, @PathParam("subject") String subject, String schema) {
     MessageAcknowledgement<String> acknowledgement;
-    if (StringUtils.isAnyBlank(subject, schema)) {
+    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
+      logger.error("Accept is not set correctly, subject: {}", subject);
+      acknowledgement =
+        new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
+    } else if (StringUtils.isAnyBlank(subject, schema)) {
       logger.error("Invalid Parameter Passed to function, subject: {}, schema: {}", subject, schema);
-      acknowledgement = new MessageAcknowledgement<String>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+      acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
       try {
         // Verifying schema
         new Schema.Parser().parse(schema);
         acknowledgement =
-          new MessageAcknowledgement<String>(StatusCodes.CREATED.getStatusCode(), StatusCodes.CREATED.getReasonPhrase(),
+          new MessageAcknowledgement<>(StatusCodes.CREATED.getStatusCode(), StatusCodes.CREATED.getReasonPhrase(),
             getSubject(subject).register(schema).getId());
         logger.info("Register a schema with {} is successful.", subject);
       } catch (Exception e) {
         logger.error("Register a schema with {} is failed, err: {}", subject, e.getMessage());
         acknowledgement =
-          new MessageAcknowledgement<String>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
+          new MessageAcknowledgement<>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
       }
     }
     return Response.ok(acknowledgement).build();
@@ -285,31 +293,47 @@ public abstract class RESTRepository extends BaseRESTRepository {
    *          the schema to attempt to register
    * @return a 200 response with the id of the newly registered schema, or a 404
    *         response if the subject or id does not exist or a 409 conflict if
-   *         the id does not match the latest id or a 403 forbidden response
+   *         the id does not match the latest id or a 422 Unprocessable Entity response
    *         with exception message if the schema fails validation
    */
   @PUT
   @Path("{subject}/register_if_latest/{latestId: .*}")
-  @Consumes(MediaType.TEXT_PLAIN)
-  public Response addSchema(@PathParam("subject") String subject, @PathParam("latestId") String latestId,
-    String schema) {
-    Subject s = getSubject(subject);
-    SchemaEntry latest;
-    if ("".equals(latestId)) {
-      latest = null;
+  @Consumes(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
+  @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
+  public Response addSchema(@HeaderParam("Accept") String accept, @PathParam("subject") String subject,
+    @PathParam("latestId") String latestId, String schema) {
+    MessageAcknowledgement<String> acknowledgement;
+    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
+      logger.error("Accept is not set correctly, subject: {}", subject);
+      acknowledgement =
+        new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
+    } else if (StringUtils.isAnyBlank(subject, schema)) {
+      logger.error("Invalid Parameter Passed to function, subject: {}, schema: {}", subject, schema);
+      acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+        StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
-      latest = exists(s.lookupById(latestId));
-    }
-    SchemaEntry created;
-    try {
-      created = s.registerIfLatest(schema, latest);
-      if (null == created) {
-        return Response.status(Status.CONFLICT).build();
+      try {
+        Subject s = getSubject(subject);
+        SchemaEntry latest;
+        if (StringUtils.isAnyBlank(latestId)) {
+          latest = null;
+        } else {
+          latest = exists(s.lookupById(latestId));
+        }
+        SchemaEntry created = s.registerIfLatest(schema, latest);
+        if (null == created) {
+          acknowledgement =
+            new MessageAcknowledgement<>(Status.CONFLICT.getStatusCode(), Status.CONFLICT.getReasonPhrase(), null);
+        } else {
+          acknowledgement =
+            new MessageAcknowledgement<>(Status.OK.getStatusCode(), Status.OK.getReasonPhrase(), created.getId());
+        }
+      } catch (Exception e) {
+        acknowledgement =
+          new MessageAcknowledgement<>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
       }
-      return Response.ok(created.getId()).build();
-    } catch (SchemaValidationException e) {
-      return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
     }
+    return Response.ok(acknowledgement).build();
   }
 
   /**
@@ -336,14 +360,14 @@ public abstract class RESTRepository extends BaseRESTRepository {
   private Subject getSubject(String subjectName) {
     Subject subject = repo.lookup(subjectName);
     if (null == subject) {
-      throw new NotFoundException(MessageStrings.SUBJECT_DOES_NOT_EXIST_ERROR);
+      throw new NotFoundException(Message.SUBJECT_DOES_NOT_EXIST_ERROR);
     }
     return subject;
   }
 
   private SchemaEntry exists(SchemaEntry entry) {
     if (null == entry) {
-      throw new NotFoundException(MessageStrings.SCHEMA_DOES_NOT_EXIST_ERROR);
+      throw new NotFoundException(Message.SCHEMA_DOES_NOT_EXIST_ERROR);
     }
     return entry;
   }

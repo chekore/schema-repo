@@ -102,7 +102,7 @@ public final class RepositoryUtil {
     }
     if (scheamWithNewLine) {
       return new StringBuilder()
-              .append(MessageStrings.SCHEMA_WITH_NEWLINE_ERROR)
+              .append(Message.SCHEMA_WITH_NEWLINE_ERROR)
               .append(sb).toString();
     } else {
       return sb.toString();

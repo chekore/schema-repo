@@ -21,6 +21,7 @@ package org.schemarepo;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * A {@link Subject} is a collection of mutually compatible Schemas. <br/>
  * <br/>
@@ -73,6 +74,62 @@ public abstract class Subject {
   }
 
   /**
+   * Create a {@link Subject} that rejects modifications, throwing
+   * {@link IllegalStateException} if a modification is attempted
+   **/
+  public static final Subject readOnly(Subject subject) {
+    if (null == subject) {
+      return subject;
+    } else {
+      return new ReadOnlySubject(subject);
+    }
+  }
+
+  /**
+   * Create a {@link Subject} that validates schemas as configured.
+   */
+  public static Subject validatingSubject(Subject subject, ValidatorFactory factory) {
+    if (null == subject) {
+      return subject;
+    }
+
+    List<Validator> validators;
+    SubjectConfig config = subject.getConfig();
+
+    // if the validators key is not specified in the subject config, get the default ones.
+    // ensure that even an empty set is honored as "no validators"
+    if (config.get(SubjectConfig.VALIDATORS_KEY) != null) {
+      validators = factory.getValidators(config.getValidators());
+    } else {
+      validators = factory.getValidators(factory.getDefaultSubjectValidators());
+    }
+
+    if (!validators.isEmpty()) {
+      return new ValidatingSubject(subject, new CompositeValidator(validators));
+    } else {
+      return subject;
+    }
+  }
+
+  /**
+   * Create a {@link Subject} that caches id to schema mappings using the
+   * {@link SchemaEntryCache} provided.
+   *
+   * @param subject
+   *          The {@link Subject} to wrap
+   * @param cache
+   *          The {@link SchemaEntryCache} to cache with
+   * @return returns a {@link Subject} instance that caches {@link SchemaEntry}
+   *         values with the cache provided, if and only if both parameters are
+   *         not null. <br/>
+   *         If the provided subject is null, returns null. If the provided
+   *         cache is null, returns the provided subject without wrapping it.
+   */
+  public static Subject cacheWith(Subject subject, SchemaEntryCache cache) {
+    return (null == subject || null == cache) ? subject : new CachingSubject(subject, cache);
+  }
+
+  /**
    * Return the Name of the Subject. A Subject name can not contain whitespace,
    * and must not be empty or null.
    */
@@ -114,7 +171,7 @@ public abstract class Subject {
    *           of the subject
    */
   public abstract SchemaEntry register(String schema)
-      throws SchemaValidationException;
+    throws SchemaValidationException;
 
   /**
    * Register the provided schema only if the current latest schema matches the
@@ -132,7 +189,7 @@ public abstract class Subject {
    *           of the subject
    */
   public abstract SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
-      throws SchemaValidationException;
+    throws SchemaValidationException;
 
   /**
    * Lookup the {@link SchemaEntry} for the given schema. Since the mapping of
@@ -183,25 +240,14 @@ public abstract class Subject {
     return name;
   }
 
-  /**
-   * Create a {@link Subject} that rejects modifications, throwing
-   * {@link IllegalStateException} if a modification is attempted
-   **/
-  public static final Subject readOnly(Subject subject) {
-    if (null == subject) {
-      return subject;
-    } else {
-      return new ReadOnlySubject(subject);
-    }
-  }
-
   private static class ReadOnlySubject extends DelegatingSubject {
     private ReadOnlySubject(Subject subject) {
       super(subject);
     }
 
     @Override
-    public SchemaEntry register(String schema) throws SchemaValidationException {
+    public SchemaEntry register(String schema)
+      throws SchemaValidationException {
       throw new IllegalStateException("Cannot register, subject is read-only");
     }
 
@@ -209,44 +255,19 @@ public abstract class Subject {
     public SchemaEntry registerIfLatest(String schema, SchemaEntry latest) {
       throw new IllegalStateException("Cannot register, subject is read-only");
     }
-
-  }
-
-  /**
-   * Create a {@link Subject} that validates schemas as configured.
-   */
-  public static Subject validatingSubject(Subject subject, ValidatorFactory factory) {
-    if (null == subject) {
-      return subject;
-    }
-
-    List<Validator> validators;
-    SubjectConfig config = subject.getConfig();
-
-    // if the validators key is not specified in the subject config, get the default ones.
-    // ensure that even an empty set is honored as "no validators"
-    if (config.get(SubjectConfig.VALIDATORS_KEY) != null)
-      validators = factory.getValidators(config.getValidators());
-    else
-      validators = factory.getValidators(factory.getDefaultSubjectValidators());
-
-    if (!validators.isEmpty()) {
-      return new ValidatingSubject(subject, new CompositeValidator(validators));
-    } else {
-      return subject;
-    }
   }
 
   private static final class CompositeValidator implements Validator {
     private final ArrayList<Validator> validators;
+
     private CompositeValidator(List<Validator> validators) {
       this.validators = new ArrayList<Validator>(validators);
     }
 
     @Override
-    public void validate(String schemaToValidate,
-        Iterable<SchemaEntry> schemasInOrder) throws SchemaValidationException {
-      for(Validator v : validators) {
+    public void validate(String schemaToValidate, Iterable<SchemaEntry> schemasInOrder)
+      throws SchemaValidationException {
+      for (Validator v : validators) {
         v.validate(schemaToValidate, schemasInOrder);
       }
     }
@@ -261,7 +282,8 @@ public abstract class Subject {
     }
 
     @Override
-    public SchemaEntry register(String schema) throws SchemaValidationException {
+    public SchemaEntry register(String schema)
+      throws SchemaValidationException {
       while (true) {
         Iterable<SchemaEntry> schemaEntries = allEntries();
         SchemaEntry actualLatest = null;
@@ -280,15 +302,14 @@ public abstract class Subject {
 
     @Override
     public SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
-        throws SchemaValidationException {
+      throws SchemaValidationException {
       Iterable<SchemaEntry> schemaEntries = allEntries();
       SchemaEntry actualLatest = null;
       for (SchemaEntry entry : schemaEntries) {
         actualLatest = entry;
         break;
       }
-      if (actualLatest == latest
-          || ((actualLatest != null) && actualLatest.equals(latest))) {
+      if (actualLatest == latest || ((actualLatest != null) && actualLatest.equals(latest))) {
         // they are equal, either both are null or they equal
         validator.validate(schema, schemaEntries);
         return super.registerIfLatest(schema, latest);
@@ -296,25 +317,6 @@ public abstract class Subject {
         return null;
       }
     }
-  }
-
-  /**
-   * Create a {@link Subject} that caches id to schema mappings using the
-   * {@link SchemaEntryCache} provided.
-   *
-   * @param subject
-   *          The {@link Subject} to wrap
-   * @param cache
-   *          The {@link SchemaEntryCache} to cache with
-   * @return returns a {@link Subject} instance that caches {@link SchemaEntry}
-   *         values with the cache provided, if and only if both parameters are
-   *         not null. <br/>
-   *         If the provided subject is null, returns null. If the provided
-   *         cache is null, returns the provided subject without wrapping it.
-   */
-  public static Subject cacheWith(Subject subject, SchemaEntryCache cache) {
-    return (null == subject || null == cache) ?
-        subject : new CachingSubject(subject, cache);
   }
 
   private static class CachingSubject extends DelegatingSubject {
@@ -326,7 +328,8 @@ public abstract class Subject {
     }
 
     @Override
-    public SchemaEntry register(String schema) throws SchemaValidationException {
+    public SchemaEntry register(String schema)
+      throws SchemaValidationException {
       SchemaEntry entry = cache.lookupBySchema(schema);
       if (entry == null) {
         return cache.add(super.register(schema));
@@ -336,7 +339,7 @@ public abstract class Subject {
 
     @Override
     public SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
-        throws SchemaValidationException {
+      throws SchemaValidationException {
       return cache.add(super.registerIfLatest(schema, latest));
     }
 
@@ -367,5 +370,4 @@ public abstract class Subject {
       return all;
     }
   }
-
 }
