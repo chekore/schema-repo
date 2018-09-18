@@ -74,7 +74,7 @@ public class TestRESTRepository {
   @Test(expected = NotFoundException.class)
   public void testNonExistenSubject()
     throws Exception {
-    repo.checkSubject("application/vnd.schemaregistry.v1+json", "nothing");
+    repo.checkSubject("nothing");
   }
 
   @Test(expected = NotFoundException.class)

@@ -353,13 +353,9 @@ public class RESTRepository extends BaseRESTRepository {
   @GET
   @Path("{subject}")
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
-  public Response checkSubject(@HeaderParam("Accept") String accept, @PathParam("subject") String subject) {
+  public Response checkSubject(@PathParam("subject") String subject) {
     MessageAcknowledgement<String> acknowledgement;
-    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
-      logger.error("Accept is not set correctly, Method: checkSubject, subject: {}", subject);
-      acknowledgement =
-        new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
-    } else if (StringUtils.isAnyBlank(subject)) {
+    if (StringUtils.isAnyBlank(subject)) {
       logger.error("Invalid Parameter Passed to function, Method: checkSubject, subject: {}", subject);
       acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
