@@ -322,13 +322,19 @@ public class RESTRepository extends BaseRESTRepository {
         }
         SchemaEntry created = s.registerIfLatest(schema, latest);
         if (null == created) {
+          logger.warn(
+            "Register a schema with a subject is conflicting, only if the latest schema equals the expected value.");
           acknowledgement =
             new MessageAcknowledgement<>(Status.CONFLICT.getStatusCode(), Status.CONFLICT.getReasonPhrase(), null);
         } else {
+          logger.info(
+            "Register a schema with a subject is successful, only if the latest schema equals the expected value.");
           acknowledgement =
             new MessageAcknowledgement<>(Status.OK.getStatusCode(), Status.OK.getReasonPhrase(), created.getId());
         }
       } catch (Exception e) {
+        logger
+          .error("Register a schema with a subject is failed, only if the latest schema equals the expected value.");
         acknowledgement =
           new MessageAcknowledgement<>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
       }
@@ -341,14 +347,34 @@ public class RESTRepository extends BaseRESTRepository {
    *
    * @param subject
    *          the name of the subject
-   * @return a 200 response if the subject exists, or a 404 response if the
+   * @return a 200 response if the subject exists, or a 410 response if the
    *         subject does not.
    */
   @GET
   @Path("{subject}")
-  public Response checkSubject(@PathParam("subject") String subject) {
-    getSubject(subject);
-    return Response.ok().build();
+  @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
+  public Response checkSubject(@HeaderParam("Accept") String accept, @PathParam("subject") String subject) {
+    MessageAcknowledgement<String> acknowledgement;
+    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
+      logger.error("Accept is not set correctly, subject: {}", subject);
+      acknowledgement =
+        new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
+    } else if (StringUtils.isAnyBlank(subject)) {
+      logger.error("Invalid Parameter Passed to function, subject: {}", subject);
+      acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+        StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
+    } else {
+      try {
+        Subject s = getSubject(subject);
+        acknowledgement =
+          new MessageAcknowledgement<>(StatusCodes.OK.getStatusCode(), StatusCodes.OK.getReasonPhrase(), s.getName());
+        logger.info("Get the subject is successful. subject: {}", subject);
+      } catch (NotFoundException e) {
+        logger.warn("Get the subject is failed, {}, subject: {}", e.getMessage(), subject);
+        acknowledgement = new MessageAcknowledgement<>(StatusCodes.GONE.getStatusCode(), e.getMessage(), null);
+      }
+    }
+    return Response.ok(acknowledgement).build();
   }
 
   @GET
