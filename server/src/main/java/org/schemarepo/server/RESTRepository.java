@@ -370,8 +370,9 @@ public class RESTRepository extends BaseRESTRepository {
           new MessageAcknowledgement<>(StatusCodes.OK.getStatusCode(), StatusCodes.OK.getReasonPhrase(), s.getName());
         logger.info("Get the subject is successful. subject: {}", subject);
       } catch (NotFoundException e) {
-        logger.warn("Get the subject is failed, {}, subject: {}", e.getMessage(), subject);
-        acknowledgement = new MessageAcknowledgement<>(StatusCodes.GONE.getStatusCode(), e.getMessage(), null);
+        logger.warn("Get the subject is failed, {}, subject: {}", Message.SUBJECT_DOES_NOT_EXIST_ERROR, subject);
+        acknowledgement =
+          new MessageAcknowledgement<>(StatusCodes.GONE.getStatusCode(), Message.SUBJECT_DOES_NOT_EXIST_ERROR, null);
       }
     }
     return Response.ok(acknowledgement).build();
