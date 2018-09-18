@@ -98,11 +98,10 @@ public abstract class RESTRepository extends BaseRESTRepository {
   @GET
   @Path("{subject}/all")
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
-  public Response allSchemaEntries(@HeaderParam("Content-Type") String contentType,
-    @PathParam("subject") String subject) {
+  public Response allSchemaEntries(@HeaderParam("Accept") String accept, @PathParam("subject") String subject) {
     MessageAcknowledgement<List> acknowledgement;
-    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(contentType)) {
-      logger.error("Content-Type is not set correctly, subject: {}", subject);
+    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
+      logger.error("Accept is not set correctly, subject: {}", subject);
       acknowledgement =
         new MessageAcknowledgement<List>(StatusCodes.INVALID_REQUEST.getStatusCode(), MessageStrings.CONTENT_TYPE_ERROR,
           null);
@@ -192,7 +191,8 @@ public abstract class RESTRepository extends BaseRESTRepository {
    */
   @GET
   @Path("{subject}/latest")
-  public String latest(@HeaderParam("Accept") String mediaType, @PathParam("subject") String subject) {
+  @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
+  public String latest(@HeaderParam("Content-Type") String mediaType, @PathParam("subject") String subject) {
     return getRenderer(mediaType).renderSchemaEntry(exists(getSubject(subject).latest()), true);
   }
 
