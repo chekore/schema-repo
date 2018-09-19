@@ -199,7 +199,7 @@ public class RepositoryServer {
       beanConfig.setSchemes(new String[]{"http"});
       beanConfig.setHost("localhost:2876");
       beanConfig.setBasePath("/api");
-      beanConfig.setResourcePackage("io.swagger.resources");
+      beanConfig.setResourcePackage("io.swagger.resources,org.schemarepo.server");
       beanConfig.setScan(true);
     }
 
