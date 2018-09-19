@@ -1,5 +1,8 @@
 package org.schemarepo.utils;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+
 /**
  * @author zhizhou.ren
  * @param <E>
@@ -40,5 +43,10 @@ public class MessageAcknowledgement<E> {
 
   public void setPayload(E payload) {
     this.payload = payload;
+  }
+
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this);
   }
 }

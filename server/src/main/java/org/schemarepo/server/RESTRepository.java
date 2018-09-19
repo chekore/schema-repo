@@ -159,7 +159,9 @@ public class RESTRepository extends BaseRESTRepository {
       acknowledgement =
         new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
     } else if (StringUtils.isAnyBlank(subject)) {
-      logger.error("Invalid Parameter Passed to function, Method: createSubject, subject: {}, configParams: {}", subject, configParams);
+      logger
+        .error("Invalid Parameter Passed to function, Method: createSubject, subject: {}, configParams: {}", subject,
+          configParams);
       acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
@@ -202,7 +204,7 @@ public class RESTRepository extends BaseRESTRepository {
       logger.error("Accept is not set correctly, Method: latest, subject: {}", subject);
       acknowledgement =
         new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
-      return Response.ok(acknowledgement).build().toString();
+      return acknowledgement.toString();
     } else {
       return getRenderer(accept).renderSchemaEntry(exists(getSubject(subject).latest()), true);
     }
@@ -316,7 +318,9 @@ public class RESTRepository extends BaseRESTRepository {
       acknowledgement =
         new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
     } else if (StringUtils.isAnyBlank(subject, schema)) {
-      logger.error("Invalid Parameter Passed to function, Method: addSchema/register_if_latest, subject: {}, schema: {}", subject, schema);
+      logger
+        .error("Invalid Parameter Passed to function, Method: addSchema/register_if_latest, subject: {}, schema: {}",
+          subject, schema);
       acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
