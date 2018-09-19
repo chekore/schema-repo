@@ -2,12 +2,10 @@ package org.schemarepo.server;
 
 import java.util.Properties;
 
+import org.schemarepo.RepositoryUtil;
 import org.schemarepo.SchemaEntry;
 import org.schemarepo.Subject;
 import org.schemarepo.json.JsonUtil;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 
 /**
@@ -40,16 +38,11 @@ public class SchemaJsonRenderer implements Renderer {
 
   @Override
   public String renderSchemaEntry(SchemaEntry schemaEntry, boolean requestForLatest) {
-    return notAcceptable("renderSchemaEntry");
+    return requestForLatest ? schemaEntry.toString() : schemaEntry.getSchema();
   }
 
   @Override
   public String renderProperties(Properties props, String comment) {
-    return notAcceptable("renderProperties");
-  }
-
-  private String notAcceptable(String api) {
-    throw new WebApplicationException(Response.status(Response.Status.NOT_ACCEPTABLE)
-      .entity(String.format("%s API does not support %s media type", api, getMediaType())).build());
+    return RepositoryUtil.propertiesToString(props, comment);
   }
 }

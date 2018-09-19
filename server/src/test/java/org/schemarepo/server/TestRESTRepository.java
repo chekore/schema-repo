@@ -83,6 +83,11 @@ public class TestRESTRepository {
     repo.allSchemaEntries(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON, "nothing");
   }
 
+  @Test
+  public void testSchemaLatest() {
+    repo.latest("application/vnd.schemaregistry.v1+json","DS.Input.All.Cysxzb");
+  }
+
   @Test(expected = NotFoundException.class)
   public void testNonExistentSubjectGetConfig()
     throws Exception {
