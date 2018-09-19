@@ -35,6 +35,8 @@ import org.schemarepo.utils.StatusCodes;
 
 import com.sun.jersey.api.NotFoundException;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -59,6 +61,7 @@ import javax.ws.rs.core.Response.Status;
  * handle media types differently and are accessible via different paths, though the actual functionality of
  * accessing the underlying repository server is contained in this class.
  */
+@Api(tags = "Schema Repo")
 public class RESTRepository extends BaseRESTRepository {
 
   /**
@@ -81,6 +84,7 @@ public class RESTRepository extends BaseRESTRepository {
    * @return All subjects in the repository, serialized with {@link org.schemarepo.RepositoryUtil#subjectsToString(Iterable)}
    */
   @GET
+  @ApiOperation(value = "All subjects in the repository")
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response allSubjects(@HeaderParam("Accept") String accept) {
     if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {

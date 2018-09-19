@@ -46,6 +46,7 @@ import com.google.inject.servlet.GuiceFilter;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 
+import io.swagger.jaxrs.config.DefaultJaxrsConfig;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServlet;
@@ -188,6 +189,14 @@ public class RepositoryServer {
       bind(MachineOrientedRESTRepository.class);
       bind(HumanOrientedRESTRepository.class);
       bind(AuxiliaryRESTRepository.class);
+      Map<String, String> swInitParams = new HashMap<>(1);
+      swInitParams.put("com.sun.jersey.config.property.packages",
+        "io.swagger.jaxrs.json,io.swagger.jaxrs.listing,org.schemarepo.server");
+      serve("/api/*").with(GuiceContainer.class, swInitParams);
+      Map<String, String> configInitParams = new HashMap<>(2);
+      configInitParams.put("api.version", "1.0.0");
+      configInitParams.put("swagger.api.basepath", "http://localhost:2876/api");
+      serve("").with(DefaultJaxrsConfig.class, configInitParams);
     }
 
     @Provides
