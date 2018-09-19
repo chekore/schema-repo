@@ -74,7 +74,7 @@ public class TestRESTRepository {
   @Test(expected = NotFoundException.class)
   public void testNonExistenSubject()
     throws Exception {
-    repo.checkSubject("nothing");
+    repo.checkSubject(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON, "nothing");
   }
 
   @Test(expected = NotFoundException.class)
@@ -85,7 +85,7 @@ public class TestRESTRepository {
 
   @Test
   public void testSchemaLatest() {
-    repo.latest("application/vnd.schemaregistry.v1+json","DS.Input.All.Cysxzb");
+    repo.latest("application/vnd.schemaregistry.v1+json", "DS.Input.All.Cysxzb");
   }
 
   @Test(expected = NotFoundException.class)
@@ -96,7 +96,7 @@ public class TestRESTRepository {
 
   @Test
   public void testCreateNullSubject() {
-    assertEquals(400, repo.createSubject("application/vnd.schemaregistry.v1+json",null, null).getStatus());
+    assertEquals(400, repo.createSubject("application/vnd.schemaregistry.v1+json", null, null).getStatus());
   }
 
   @Test
@@ -122,7 +122,7 @@ public class TestRESTRepository {
   @Test
   public void testInfluenceOfMediaTypeSuccess() {
     final String contentType = "Content-Type";
-    repo.createSubject("application/vnd.schemaregistry.v1+json","dummy", new MultivaluedMapImpl());
+    repo.createSubject("application/vnd.schemaregistry.v1+json", "dummy", new MultivaluedMapImpl());
     // null and all-inclusive (* or */*) mediaTypes result in the default configured renderer being used
     for (String mediaType : new String[]{null, "", "*/*", "text/plain", "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2"}) {
       Response response;
@@ -154,7 +154,7 @@ public class TestRESTRepository {
 
   @Test
   public void testSchemaGetsCreated() {
-    repo.createSubject("application/vnd.schemaregistry.v1+json","dummy", new MultivaluedMapImpl());
+    repo.createSubject("application/vnd.schemaregistry.v1+json", "dummy", new MultivaluedMapImpl());
     Response response = repo.addSchema("application/vnd.schemaregistry.v1+json", "dummy", "schema");
     assertEquals(Status.OK.getStatusCode(), response.getStatus());
   }
@@ -168,7 +168,7 @@ public class TestRESTRepository {
   public void testFailingValidationReportsErrors() {
     MultivaluedMapImpl configParams = new MultivaluedMapImpl();
     configParams.putSingle("repo.validators", "repo.reject");
-    repo.createSubject("application/vnd.schemaregistry.v1+json","dummy", configParams);
+    repo.createSubject("application/vnd.schemaregistry.v1+json", "dummy", configParams);
 
     Response response = repo.addSchema("application/vnd.schemaregistry.v1+json", "dummy", "schema");
 
