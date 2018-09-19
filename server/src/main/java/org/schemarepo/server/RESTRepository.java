@@ -206,7 +206,7 @@ public class RESTRepository extends BaseRESTRepository {
         new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
       return Response.status(StatusCodes.INVALID_REQUEST).entity(acknowledgement).build();
     } else {
-      return Response.ok(getRenderer(accept).renderSchemaEntry(exists(getSubject(subject).latest()), true)).build();
+      return Response.ok(exists(getSubject(subject).latest())).build();
     }
   }
 
