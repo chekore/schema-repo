@@ -196,8 +196,16 @@ public class RESTRepository extends BaseRESTRepository {
   @GET
   @Path("{subject}/latest")
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
-  public String latest(@HeaderParam("Accept") String mediaType, @PathParam("subject") String subject) {
-    return getRenderer(mediaType).renderSchemaEntry(exists(getSubject(subject).latest()), true);
+  public String latest(@HeaderParam("Accept") String accept, @PathParam("subject") String subject) {
+    MessageAcknowledgement<String> acknowledgement;
+    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
+      logger.error("Accept is not set correctly, Method: latest, subject: {}", subject);
+      acknowledgement =
+        new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
+      return Response.ok(acknowledgement).build().toString();
+    } else {
+      return getRenderer(accept).renderSchemaEntry(exists(getSubject(subject).latest()), true);
+    }
   }
 
   /**
