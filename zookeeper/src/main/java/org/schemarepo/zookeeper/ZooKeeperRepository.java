@@ -408,7 +408,12 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
         if (rawContent == null || rawContent.length == 0) {
           return null;
         } else {
-          return new String(rawContent);
+          String tmp = new String(rawContent, "UTF-8");
+          if (tmp.endsWith("\n")) {
+            return tmp.substring(0, tmp.lastIndexOf("\n"));
+          } else {
+            return tmp;
+          }
         }
       } catch (KeeperException.NoNodeException e) {
         // The schema for this ID does not exist in ZK.
