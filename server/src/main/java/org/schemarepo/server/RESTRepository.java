@@ -275,11 +275,17 @@ public class RESTRepository extends BaseRESTRepository {
         StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
       try {
+        String tmp;
+        if (schema.endsWith("\n")) {
+          tmp = schema.substring(0, schema.lastIndexOf("\n"));
+        } else {
+          tmp = schema;
+        }
         // Verifying schema
-        new Schema.Parser().parse(schema);
+        new Schema.Parser().parse(tmp);
         acknowledgement =
           new MessageAcknowledgement<>(StatusCodes.CREATED.getStatusCode(), StatusCodes.CREATED.getReasonPhrase(),
-            getSubject(subject).register(schema).getId());
+            getSubject(subject).register(tmp).getId());
         logger.info("Register a schema with {} is successful.", subject);
       } catch (Exception e) {
         logger.error("Register a schema with {} is failed, err: {}", subject, e.getMessage());
