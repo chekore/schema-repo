@@ -81,9 +81,17 @@ public class RESTRepository extends BaseRESTRepository {
    * @return All subjects in the repository, serialized with {@link org.schemarepo.RepositoryUtil#subjectsToString(Iterable)}
    */
   @GET
-  public Response allSubjects(@HeaderParam("Accept") String mediaType) {
-    Renderer renderer = getRenderer(mediaType);
-    return Response.ok(renderer.renderSubjects(repo.subjects()), renderer.getMediaType()).build();
+  @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
+  public Response allSubjects(@HeaderParam("Accept") String accept) {
+    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
+      logger.error("Accept is not set correctly, Method: allSubjects");
+      return Response.status(StatusCodes.INVALID_REQUEST).entity(Message.ACCEPT_ERROR).build();
+    } else {
+      List<String> sl = new ArrayList<>();
+      repo.subjects().forEach(subject -> sl.add(subject.getName()));
+      logger.info("Query all subjects in the repository is successful.");
+      return Response.ok(sl).build();
+    }
   }
 
   /**
@@ -198,13 +206,11 @@ public class RESTRepository extends BaseRESTRepository {
   @Path("{subject}/latest")
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response latest(@HeaderParam("Accept") String accept, @PathParam("subject") String subject) {
-    MessageAcknowledgement<String> acknowledgement;
     if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
       logger.error("Accept is not set correctly, Method: latest, subject: {}", subject);
-      acknowledgement =
-        new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
-      return Response.status(StatusCodes.INVALID_REQUEST).entity(acknowledgement).build();
+      return Response.status(StatusCodes.INVALID_REQUEST).entity(Message.ACCEPT_ERROR).build();
     } else {
+      logger.info("Get the latest schema for the subject is successful. subject: {}", subject);
       return Response.ok(exists(getSubject(subject).latest())).build();
     }
   }
