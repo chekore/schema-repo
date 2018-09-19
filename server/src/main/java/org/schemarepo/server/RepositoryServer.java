@@ -199,8 +199,6 @@ public class RepositoryServer {
       bind(MachineOrientedRESTRepository.class);
       bind(HumanOrientedRESTRepository.class);
       bind(AuxiliaryRESTRepository.class);
-      bind(ApiListingResource.class);
-      bind(SwaggerSerializers.class);
     }
 
     @Provides
