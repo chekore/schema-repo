@@ -102,6 +102,13 @@ public class RepositoryServer {
 
     Injector injector = Guice.createInjector(new ConfigModule(props), new ServerModule());
     this.server = injector.getInstance(Server.class);
+    BeanConfig beanConfig = new BeanConfig();
+    beanConfig.setVersion("1.0.2");
+    beanConfig.setSchemes(new String[]{"http"});
+    beanConfig.setHost("localhost:2876");
+    beanConfig.setBasePath("/api");
+    beanConfig.setResourcePackage("io.swagger.resources,org.schemarepo.server");
+    beanConfig.setScan(true);
   }
 
   public static void main(String... args)
@@ -194,13 +201,6 @@ public class RepositoryServer {
       bind(AuxiliaryRESTRepository.class);
       bind(ApiListingResource.class);
       bind(SwaggerSerializers.class);
-      BeanConfig beanConfig = new BeanConfig();
-      beanConfig.setVersion("1.0.2");
-      beanConfig.setSchemes(new String[]{"http"});
-      beanConfig.setHost("localhost:2876");
-      beanConfig.setBasePath("/api");
-      beanConfig.setResourcePackage("io.swagger.resources,org.schemarepo.server");
-      beanConfig.setScan(true);
     }
 
     @Provides
