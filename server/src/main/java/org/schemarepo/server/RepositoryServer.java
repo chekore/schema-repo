@@ -193,10 +193,6 @@ public class RepositoryServer {
       swInitParams.put("com.sun.jersey.config.property.packages",
         "io.swagger.jaxrs.json,io.swagger.jaxrs.listing,org.schemarepo.server");
       serve("/api/*").with(GuiceContainer.class, swInitParams);
-      Map<String, String> configInitParams = new HashMap<>(2);
-      configInitParams.put("api.version", "1.0.0");
-      configInitParams.put("swagger.api.basepath", "http://localhost:2876/api");
-      serve("").with(DefaultJaxrsConfig.class, configInitParams);
     }
 
     @Provides
@@ -221,6 +217,7 @@ public class RepositoryServer {
       FilterHolder holder = new FilterHolder(guiceFilter);
       handler.addFilter(holder, "/*", null);
       handler.addServlet(NoneServlet.class, "/");
+      handler.addServlet(DefaultJaxrsConfig.class, "/api");
       handler.setContextPath("/");
       handler.addLifeCycleListener(new ShutDownListener(repo, gracefulShutdown));
       server.setHandler(handler);
