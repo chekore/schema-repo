@@ -46,7 +46,10 @@ import com.google.inject.servlet.GuiceFilter;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 
+import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.DefaultJaxrsConfig;
+import io.swagger.jaxrs.listing.ApiListingResource;
+import io.swagger.jaxrs.listing.SwaggerSerializers;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServlet;
@@ -99,6 +102,14 @@ public class RepositoryServer {
 
     Injector injector = Guice.createInjector(new ConfigModule(props), new ServerModule());
     this.server = injector.getInstance(Server.class);
+
+    BeanConfig beanConfig = new BeanConfig();
+    beanConfig.setVersion("1.0.2");
+    beanConfig.setSchemes(new String[]{"http"});
+    beanConfig.setHost("localhost:2876");
+    beanConfig.setBasePath("/api");
+    beanConfig.setResourcePackage("io.swagger.resources");
+    beanConfig.setScan(true);
   }
 
   public static void main(String... args)
@@ -189,10 +200,8 @@ public class RepositoryServer {
       bind(MachineOrientedRESTRepository.class);
       bind(HumanOrientedRESTRepository.class);
       bind(AuxiliaryRESTRepository.class);
-      Map<String, String> swInitParams = new HashMap<>(1);
-      swInitParams.put("com.sun.jersey.config.property.packages",
-        "io.swagger.jaxrs.json,io.swagger.jaxrs.listing,org.schemarepo.server");
-      serve("/api/*").with(GuiceContainer.class, swInitParams);
+      bind(ApiListingResource.class);
+      bind(SwaggerSerializers.class);
     }
 
     @Provides
