@@ -98,7 +98,7 @@ public class RepositoryServer {
           julPropName, julToSlf4jDep);
     }
 
-    Injector injector = Guice.createInjector(new ConfigModule(props), new ServerModule(), new SwaggerModule());
+    Injector injector = Guice.createInjector(new ConfigModule(props), new ServerModule());
     this.server = injector.getInstance(Server.class);
   }
 
