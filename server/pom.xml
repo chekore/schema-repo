@@ -98,7 +98,7 @@
       <artifactId>avro</artifactId>
       <version>${avro.version}</version>
     </dependency>
-    <dependency>
+    <!--dependency>
       <groupId>javax.servlet.jsp</groupId>
       <artifactId>jsp-api</artifactId>
       <version>2.1</version>
@@ -144,7 +144,7 @@
       <groupId>org.zeroturnaround</groupId>
       <artifactId>jr-sdk</artifactId>
       <version>2.1.1</version>
-    </dependency>
+    </dependency-->
     <!-- to include logback-test.xml, otherwise the production logback.xml is used when running tests -->
     <dependency>
       <groupId>org.schemarepo</groupId>
