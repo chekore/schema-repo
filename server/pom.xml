@@ -154,6 +154,10 @@
       <artifactId>groovy-all</artifactId>
       <version>2.4.12</version>
     </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
     <!-- to include logback-test.xml, otherwise the production logback.xml is used when running tests -->
     <dependency>
       <groupId>org.schemarepo</groupId>
