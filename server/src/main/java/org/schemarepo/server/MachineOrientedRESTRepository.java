@@ -22,6 +22,7 @@ import java.util.Arrays;
 
 import org.schemarepo.Repository;
 import org.schemarepo.json.JsonUtil;
+import org.schemarepo.rest.RESTRepository;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,7 +31,7 @@ import javax.ws.rs.Path;
 
 
 /**
- * Subclass of {@link org.schemarepo.server.RESTRepository} which supports machine-oriented rendering
+ * Subclass of {@link RESTRepository} which supports machine-oriented rendering
  * (plain text and JSON).
  */
 @Singleton

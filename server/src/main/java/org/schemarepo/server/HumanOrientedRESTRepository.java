@@ -24,12 +24,13 @@ import java.util.Properties;
 import javax.ws.rs.Path;
 
 import org.schemarepo.Repository;
+import org.schemarepo.rest.RESTRepository;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
- * Subclass of {@link org.schemarepo.server.RESTRepository} which supports human-oriented rendering (HTML).
+ * Subclass of {@link RESTRepository} which supports human-oriented rendering (HTML).
  */
 @Singleton
 @Path("/schema-repo-browser")

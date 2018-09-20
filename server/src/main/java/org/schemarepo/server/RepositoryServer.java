@@ -37,6 +37,7 @@ import org.schemarepo.Repository;
 import org.schemarepo.config.Config;
 import org.schemarepo.config.ConfigModule;
 import org.schemarepo.config.SwaggerModule;
+import org.schemarepo.rest.RESTRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +49,6 @@ import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 
 import io.swagger.jaxrs.config.DefaultJaxrsConfig;
-import io.swagger.jaxrs.listing.ApiListingResource;
-import io.swagger.jaxrs.listing.SwaggerSerializers;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServlet;

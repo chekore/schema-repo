@@ -16,7 +16,7 @@
  * permissions and limitations under the License.
  */
 
-package org.schemarepo.server;
+package org.schemarepo.rest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +30,10 @@ import org.schemarepo.Repository;
 import org.schemarepo.SchemaEntry;
 import org.schemarepo.Subject;
 import org.schemarepo.SubjectConfig;
+import org.schemarepo.server.BaseRESTRepository;
+import org.schemarepo.server.CustomMediaType;
+import org.schemarepo.server.Renderer;
+import org.schemarepo.server.RepositoryServer;
 import org.schemarepo.utils.MessageAcknowledgement;
 import org.schemarepo.utils.StatusCodes;
 

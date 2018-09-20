@@ -18,7 +18,7 @@ public class Bootstrap extends ServletContainer {
     beanConfig.setSchemes(new String[]{"http"});
     beanConfig.setHost("localhost:8085");
     beanConfig.setBasePath("/api");
-    beanConfig.setResourcePackage("org.schemarepo.server");
+    beanConfig.setResourcePackage("org.schemarepo.rest");
     beanConfig.setScan(true);
   }
 }

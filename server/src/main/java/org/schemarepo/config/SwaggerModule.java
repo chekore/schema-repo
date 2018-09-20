@@ -12,7 +12,7 @@ public class SwaggerModule extends ServletModule {
     super.configureServlets();
     Map<String, String> params = new HashMap<String, String>();
     params.put("com.sun.jersey.config.property.packages",
-      "io.swagger.jaxrs.json;io.swagger.jaxrs.listing;org.schemarepo.server");
+      "io.swagger.jaxrs.json;io.swagger.jaxrs.listing;org.schemarepo.rest");
     serve("/api/*").with(Bootstrap.class, params);
   }
 }

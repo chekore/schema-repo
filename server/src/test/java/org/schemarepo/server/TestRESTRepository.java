@@ -29,6 +29,7 @@ import org.schemarepo.BaseRepository;
 import org.schemarepo.InMemoryRepository;
 import org.schemarepo.ValidatorFactory;
 import org.schemarepo.json.GsonJsonUtil;
+import org.schemarepo.rest.RESTRepository;
 
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
