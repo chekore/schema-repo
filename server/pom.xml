@@ -162,7 +162,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <scope>runtime</scope>
+      <scope>compile</scope>
     </dependency>
     <!-- to include logback-test.xml, otherwise the production logback.xml is used when running tests -->
     <dependency>
