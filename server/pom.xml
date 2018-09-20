@@ -138,7 +138,7 @@
     <dependency>
       <groupId>jline</groupId>
       <artifactId>jline</artifactId>
-      <version>2.14.2</version>
+      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.zeroturnaround</groupId>
