@@ -48,7 +48,6 @@ import com.google.inject.servlet.GuiceFilter;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 
-import io.swagger.jaxrs.config.DefaultJaxrsConfig;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServlet;
@@ -215,7 +214,6 @@ public class RepositoryServer {
       FilterHolder holder = new FilterHolder(guiceFilter);
       handler.addFilter(holder, "/*", null);
       handler.addServlet(NoneServlet.class, "/");
-      handler.addServlet(DefaultJaxrsConfig.class, "/api");
       handler.setContextPath("/");
       handler.addLifeCycleListener(new ShutDownListener(repo, gracefulShutdown));
       server.setHandler(handler);
