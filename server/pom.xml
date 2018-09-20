@@ -80,6 +80,11 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>8.2.0.v20160908</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-jsp</artifactId>
       <version>8.2.0.v20160908</version>
       <exclusions>
@@ -90,9 +95,9 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>javax.servlet.jsp.jstl</groupId>
-      <artifactId>javax.servlet.jsp.jstl-api</artifactId>
-      <version>1.2.1</version>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-project</artifactId>
+      <version>8.2.0.v20160908</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
