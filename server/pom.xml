@@ -105,9 +105,9 @@
       <version>${avro.version}</version>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.2</version>
     </dependency>
 
     <!-- to include logback-test.xml, otherwise the production logback.xml is used when running tests -->
