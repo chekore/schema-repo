@@ -95,10 +95,14 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-project</artifactId>
-      <version>8.2.0.v20160908</version>
-      <type>pom</type>
+      <groupId>javax.servlet.jsp.jstl</groupId>
+      <artifactId>javax.servlet.jsp.jstl-api</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.fastinfoset</groupId>
+      <artifactId>FastInfoset</artifactId>
+      <version>1.2.13</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
