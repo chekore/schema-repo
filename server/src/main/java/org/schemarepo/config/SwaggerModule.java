@@ -3,10 +3,10 @@ package org.schemarepo.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sun.jersey.guice.JerseyServletModule;
+import com.google.inject.servlet.ServletModule;
 
 
-public class SwaggerModule extends JerseyServletModule {
+public class SwaggerModule extends ServletModule {
   @Override
   protected void configureServlets() {
     super.configureServlets();
