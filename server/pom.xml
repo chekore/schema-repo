@@ -75,6 +75,11 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-ant</artifactId>
+      <version>8.1.16.v20140903</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-jsp</artifactId>
       <version>8.2.0.v20160908</version>
       <exclusions>
