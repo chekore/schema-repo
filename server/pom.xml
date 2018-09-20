@@ -169,11 +169,6 @@
       <artifactId>xalan</artifactId>
       <version>2.7.2</version>
     </dependency>
-    <dependency>
-      <groupId>com.sun.xml.fastinfoset</groupId>
-      <artifactId>FastInfoset</artifactId>
-      <version>1.2.13</version>
-    </dependency>
     <!-- to include logback-test.xml, otherwise the production logback.xml is used when running tests -->
     <dependency>
       <groupId>org.schemarepo</groupId>
