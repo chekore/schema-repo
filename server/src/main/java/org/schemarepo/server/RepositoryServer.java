@@ -36,6 +36,7 @@ import org.eclipse.jetty.util.component.LifeCycle;
 import org.schemarepo.Repository;
 import org.schemarepo.config.Config;
 import org.schemarepo.config.ConfigModule;
+import org.schemarepo.config.SwaggerModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,6 @@ import com.google.inject.servlet.GuiceFilter;
 import com.sun.jersey.guice.JerseyServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 
-import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.DefaultJaxrsConfig;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
@@ -100,7 +100,7 @@ public class RepositoryServer {
           julPropName, julToSlf4jDep);
     }
 
-    Injector injector = Guice.createInjector(new ConfigModule(props), new ServerModule());
+    Injector injector = Guice.createInjector(new ConfigModule(props), new ServerModule(), new SwaggerModule());
     this.server = injector.getInstance(Server.class);
   }
 
