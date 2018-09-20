@@ -180,6 +180,11 @@
       <artifactId>FastInfoset</artifactId>
       <version>1.2.13</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.ant</groupId>
+      <artifactId>ant</artifactId>
+      <version>1.9.5</version>
+    </dependency>
     <!-- to include logback-test.xml, otherwise the production logback.xml is used when running tests -->
     <dependency>
       <groupId>org.schemarepo</groupId>
