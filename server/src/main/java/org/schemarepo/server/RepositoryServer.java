@@ -1,21 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 package org.schemarepo.server;
 
 import java.io.BufferedInputStream;
@@ -27,8 +9,11 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.StatisticsHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
@@ -36,7 +21,6 @@ import org.eclipse.jetty.util.component.LifeCycle;
 import org.schemarepo.Repository;
 import org.schemarepo.config.Config;
 import org.schemarepo.config.ConfigModule;
-import org.schemarepo.config.SwaggerModule;
 import org.schemarepo.rest.RESTRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,7 +169,7 @@ public class RepositoryServer {
       // for debug
       // initParams.put("com.sun.jersey.config.feature.Trace", "true");
       initParams.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
-      bind(Connector.class).to(SelectChannelConnector.class);
+      bind(Connector.class).to(ServerConnector.class);
       serve("/*").with(GuiceContainer.class, initParams);
       bind(MachineOrientedRESTRepository.class);
       bind(HumanOrientedRESTRepository.class);
@@ -200,14 +184,19 @@ public class RepositoryServer {
       @Named(Config.JETTY_GRACEFUL_SHUTDOWN) Integer gracefulShutdown, Repository repo, Connector connector,
       GuiceFilter guiceFilter, ServletContextHandler handler) {
 
+      HttpConfiguration configuration = new HttpConfiguration();
+      configuration.setRequestHeaderSize(headerSize);
+      configuration.setResponseHeaderSize(bufferSize);
+
+      HttpConnectionFactory factory = new HttpConnectionFactory(configuration);
       Server server = new Server();
+      ServerConnector serverConnector = (ServerConnector) connector;
+      serverConnector.addConnectionFactory(factory);
       if (null != host && !host.isEmpty()) {
-        connector.setHost(host);
+        serverConnector.setHost(host);
       }
-      connector.setPort(port);
-      connector.setRequestHeaderSize(headerSize);
-      connector.setRequestBufferSize(bufferSize);
-      server.setConnectors(new Connector[]{connector});
+      serverConnector.setPort(port);
+      server.setConnectors(new Connector[]{serverConnector});
 
       // the guice filter intercepts all inbound requests and uses its bindings
       // for servlets
@@ -217,9 +206,10 @@ public class RepositoryServer {
       handler.setContextPath("/");
       handler.addLifeCycleListener(new ShutDownListener(repo, gracefulShutdown));
       server.setHandler(handler);
+      server.setHandler(new StatisticsHandler());
       server.dumpStdErr();
       server.setStopAtShutdown(stopAtShutdown);
-      server.setGracefulShutdown(gracefulShutdown);
+      server.setStopTimeout(gracefulShutdown);
       return server;
     }
 
