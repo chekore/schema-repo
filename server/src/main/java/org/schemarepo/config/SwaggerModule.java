@@ -6,6 +6,9 @@ import java.util.Map;
 import com.google.inject.servlet.ServletModule;
 
 
+/**
+ * @author zhizhou.ren
+ */
 public class SwaggerModule extends ServletModule {
   @Override
   protected void configureServlets() {
