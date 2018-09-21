@@ -169,7 +169,7 @@ public class RepositoryServer {
       // for debug
       // initParams.put("com.sun.jersey.config.feature.Trace", "true");
       initParams.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
-      bind(Connector.class).to(ServerConnector.class);
+      bind(ServerConnector.class);
       serve("/*").with(GuiceContainer.class, initParams);
       bind(MachineOrientedRESTRepository.class);
       bind(HumanOrientedRESTRepository.class);
