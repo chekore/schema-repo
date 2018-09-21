@@ -9,7 +9,6 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.StatisticsHandler;
-import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.schemarepo.Repository;
@@ -38,8 +37,7 @@ public class ServerModule extends JerseyServletModule {
     // for debug
     // initParams.put("com.sun.jersey.config.feature.Trace", "true");
     initParams.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
-    //bind(Connector.class).to(ServerConnector.class, new Server());
-    bind(DefaultServlet.class);
+    bind(Connector.class).to(Connector.class);
     serve("/*").with(GuiceContainer.class, initParams);
     bind(MachineOrientedRESTRepository.class);
     bind(HumanOrientedRESTRepository.class);
