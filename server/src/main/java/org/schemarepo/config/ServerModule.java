@@ -32,12 +32,11 @@ import javax.servlet.http.HttpServlet;
 public class ServerModule extends JerseyServletModule {
   @Override
   protected void configureServlets() {
-    super.configureServlets();
     Map<String, String> initParams = new HashMap<String, String>(1);
     // for debug
     // initParams.put("com.sun.jersey.config.feature.Trace", "true");
     initParams.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
-    bind(Connector.class).to(CustomServerConnector.class);
+    bind(Connector.class).toInstance(new ServerConnector(new Server()));
     serve("/*").with(GuiceContainer.class, initParams);
     bind(MachineOrientedRESTRepository.class);
     bind(HumanOrientedRESTRepository.class);
