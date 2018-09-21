@@ -37,7 +37,7 @@ public class ServerModule extends JerseyServletModule {
     // for debug
     // initParams.put("com.sun.jersey.config.feature.Trace", "true");
     initParams.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
-    bind(Connector.class).to(Connector.class);
+    bind(Connector.class).to(CustomServerConnector.class);
     serve("/*").with(GuiceContainer.class, initParams);
     bind(MachineOrientedRESTRepository.class);
     bind(HumanOrientedRESTRepository.class);
