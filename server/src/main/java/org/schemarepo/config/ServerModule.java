@@ -90,7 +90,7 @@ public class ServerModule extends JerseyServletModule {
     return server;
   }
 
-  private static final class NoneServlet extends HttpServlet {
+  public static final class NoneServlet extends HttpServlet {
     private static final long serialVersionUID = 4560115319373180139L;
   }
 }
