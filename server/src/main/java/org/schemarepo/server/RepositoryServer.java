@@ -23,6 +23,7 @@ import com.google.inject.Injector;
  * containing a property file for configuration. <br/>
  * <br/>
  *
+ * @author zhizhou.ren
  */
 public class RepositoryServer {
   private final Server server;
