@@ -1,26 +1,12 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 package org.schemarepo.server;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
+
+import org.schemarepo.BaseRepository;
+import org.schemarepo.Repository;
+import org.schemarepo.config.Config;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,9 +17,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.schemarepo.BaseRepository;
-import org.schemarepo.Repository;
-import org.schemarepo.config.Config;
 
 /**
  * Exposes auxiliary (not part of {@link org.schemarepo.Repository} interface) REST endpoints, such as
@@ -69,7 +52,7 @@ public class AuxiliaryRESTRepository extends BaseRESTRepository {
     String text = "OK";
     if (repo instanceof BaseRepository) {
       try {
-        ((BaseRepository)repo).isValid();
+        ((BaseRepository) repo).isValid();
       } catch (IllegalStateException e) {
         status = Status.SERVICE_UNAVAILABLE;
         text = e.getMessage();
@@ -82,14 +65,15 @@ public class AuxiliaryRESTRepository extends BaseRESTRepository {
 
   @GET
   @Path("/config")
-  public Response getConfiguration(@HeaderParam("Accept") String mediaType, @QueryParam("includeDefaults") boolean includeDefaults) {
+  public Response getConfiguration(@HeaderParam("Accept") String mediaType,
+    @QueryParam("includeDefaults") boolean includeDefaults) {
     final Properties copyOfProperties = new Properties();
     if (includeDefaults) {
       copyOfProperties.putAll(Config.DEFAULTS);
     }
     copyOfProperties.putAll(properties);
     Renderer r = getRenderer(mediaType);
-    return Response.ok(r.renderProperties(copyOfProperties, "Configuration of schema-repo server"), r.getMediaType()).build();
+    return Response.ok(r.renderProperties(copyOfProperties, "Configuration of schema-repo server"), r.getMediaType())
+      .build();
   }
-
 }

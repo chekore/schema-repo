@@ -9,7 +9,6 @@ import org.eclipse.jetty.server.Server;
 import org.schemarepo.config.Config;
 import org.schemarepo.config.ConfigModule;
 import org.schemarepo.config.ServerModule;
-import org.schemarepo.config.SwaggerModule;
 import org.schemarepo.rest.RESTRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +62,7 @@ public class RepositoryServer {
           julPropName, julToSlf4jDep);
     }
 
-    Injector injector = Guice.createInjector(new ConfigModule(props), new ServerModule(), new SwaggerModule());
+    Injector injector = Guice.createInjector(new ConfigModule(props), new ServerModule());
     this.server = injector.getInstance(Server.class);
   }
 

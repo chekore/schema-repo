@@ -1,34 +1,17 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 package org.schemarepo;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+
 /**
  * This extension of {@link AbstractTestRepository} includes tests that close
  * a schema repository and re-open it, to make sure persistence works correctly.
  */
-public abstract class AbstractTestPersistentRepository<R extends Repository>
-        extends AbstractTestRepository<R> {
+public abstract class AbstractTestPersistentRepository<R extends Repository> extends AbstractTestRepository<R> {
   @Test
-  public void testWriteCloseRead() throws Exception {
+  public void testWriteCloseRead()
+    throws Exception {
     try {
       repo.register("sub1", null).register("sc1");
       repo.register("sub2", null).register("sc2");
@@ -61,7 +44,8 @@ public abstract class AbstractTestPersistentRepository<R extends Repository>
   }
 
   @Test
-  public void testWriteCloseReadMultiLineSchema() throws Exception {
+  public void testWriteCloseReadMultiLineSchema()
+    throws Exception {
     String endOfLine = System.getProperty("line.separator");
 
     String multiLineSchema1 = "first line" + endOfLine + "second line";

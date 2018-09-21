@@ -1,21 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 package org.schemarepo;
 
 import java.io.IOException;
@@ -26,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+
 
 /**
  * {@link RepositoryUtil} contains static helper methods for the
@@ -101,9 +84,7 @@ public final class RepositoryUtil {
       sb.append(s.toString()).append("\n");
     }
     if (scheamWithNewLine) {
-      return new StringBuilder()
-              .append(Message.SCHEMA_WITH_NEWLINE_ERROR)
-              .append(sb).toString();
+      return new StringBuilder().append(Message.SCHEMA_WITH_NEWLINE_ERROR).append(sb).toString();
     } else {
       return sb.toString();
     }
@@ -132,8 +113,7 @@ public final class RepositoryUtil {
    */
   public static void validateSchemaOrSubject(String val) {
     if (null == val || val.isEmpty()) {
-      throw new IllegalArgumentException(
-          "Provided string is null or empty: '" + val + "'");
+      throw new IllegalArgumentException("Provided string is null or empty: '" + val + "'");
     }
   }
 
@@ -143,7 +123,7 @@ public final class RepositoryUtil {
    */
   public static SubjectConfig configFromProperties(Properties props) {
     HashMap<String, String> propData = new HashMap<String, String>();
-    for (String key :props.stringPropertyNames()) {
+    for (String key : props.stringPropertyNames()) {
       propData.put(key, props.getProperty(key));
     }
     return new SubjectConfig.Builder().set(propData).build();
@@ -172,7 +152,7 @@ public final class RepositoryUtil {
       return Collections.emptyList();
     }
     ArrayList<String> list = new ArrayList<String>();
-    for(String s : toSplit.split(",")) {
+    for (String s : toSplit.split(",")) {
       s = s.trim();
       if (!s.isEmpty()) {
         list.add(s);
@@ -183,12 +163,13 @@ public final class RepositoryUtil {
 
   public static String commaJoin(Collection<String> strings) {
     StringBuilder sb = new StringBuilder();
-    for(String s : strings) {
+    for (String s : strings) {
       sb.append(s).append(',');
     }
     // trim the trailing comma
-    if (sb.length() > 0)
-      return sb.substring(0,sb.length()-1);
+    if (sb.length() > 0) {
+      return sb.substring(0, sb.length() - 1);
+    }
 
     return sb.toString();
   }

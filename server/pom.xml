@@ -102,7 +102,7 @@
       <artifactId>avro</artifactId>
       <version>${avro.version}</version>
     </dependency>
-    <dependency>
+    <!--dependency>
       <groupId>io.swagger</groupId>
       <artifactId>swagger-jersey-jaxrs</artifactId>
     </dependency>
@@ -124,7 +124,7 @@
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>apache-jstl</artifactId>
       <version>9.4.12.v20180830</version>
-    </dependency>
+    </dependency-->
     <!-- to include logback-test.xml, otherwise the production logback.xml is used when running tests -->
     <dependency>
       <groupId>org.schemarepo</groupId>

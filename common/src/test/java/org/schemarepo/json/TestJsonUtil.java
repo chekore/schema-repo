@@ -1,21 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 package org.schemarepo.json;
 
 import java.util.ArrayList;
@@ -28,6 +10,7 @@ import org.schemarepo.Repository;
 import org.schemarepo.SchemaEntry;
 import org.schemarepo.Subject;
 import org.schemarepo.ValidatorFactory;
+
 
 /**
  * Test suite for JSON serialization.
@@ -49,16 +32,14 @@ public abstract class TestJsonUtil<UTIL extends JsonUtil> {
     vals.add(e1);
     vals.add(e2);
 
-    Iterable<SchemaEntry> emptyResult = jsonUtil
-            .schemasFromJson(jsonUtil.schemasToJson(empty));
+    Iterable<SchemaEntry> emptyResult = jsonUtil.schemasFromJson(jsonUtil.schemasToJson(empty));
     Iterable<SchemaEntry> emptyResult2 = jsonUtil.schemasFromJson(null);
     Iterable<SchemaEntry> emptyResult3 = jsonUtil.schemasFromJson("");
     Assert.assertEquals(empty, emptyResult);
     Assert.assertEquals(emptyResult, emptyResult2);
     Assert.assertEquals(emptyResult, emptyResult3);
 
-    Iterable<SchemaEntry> result = jsonUtil
-            .schemasFromJson(jsonUtil.schemasToJson(vals));
+    Iterable<SchemaEntry> result = jsonUtil.schemasFromJson(jsonUtil.schemasToJson(vals));
     Assert.assertEquals(vals, result);
   }
 
@@ -72,19 +53,16 @@ public abstract class TestJsonUtil<UTIL extends JsonUtil> {
     vals.add(s1);
     vals.add(s2);
 
-    Iterable<String> emptyResult = jsonUtil
-            .subjectNamesFromJson(jsonUtil.subjectsToJson(empty));
+    Iterable<String> emptyResult = jsonUtil.subjectNamesFromJson(jsonUtil.subjectsToJson(empty));
     Iterable<String> emptyResult2 = jsonUtil.subjectNamesFromJson(null);
     Iterable<String> emptyResult3 = jsonUtil.subjectNamesFromJson("");
     validate(emptyResult, empty);
     Assert.assertEquals(emptyResult, emptyResult2);
     Assert.assertEquals(emptyResult, emptyResult3);
 
-    Iterable<String> result = jsonUtil
-            .subjectNamesFromJson(jsonUtil.subjectsToJson(vals));
+    Iterable<String> result = jsonUtil.subjectNamesFromJson(jsonUtil.subjectsToJson(vals));
     validate(result, vals);
   }
-
 
   private void validate(Iterable<String> names, Iterable<Subject> subjects) {
     Iterator<String> nameIter = names.iterator();
@@ -93,5 +71,4 @@ public abstract class TestJsonUtil<UTIL extends JsonUtil> {
       Assert.assertEquals(s.getName(), name);
     }
   }
-
 }

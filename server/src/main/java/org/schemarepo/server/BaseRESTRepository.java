@@ -1,39 +1,22 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 package org.schemarepo.server;
-
-import static java.lang.String.format;
-import static javax.ws.rs.core.MediaType.WILDCARD;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.schemarepo.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Variant;
 
-import org.schemarepo.Repository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.lang.String.format;
+import static javax.ws.rs.core.MediaType.WILDCARD;
+
 
 /**
  * Core / internal functionality common to all variants of REST repositories.
@@ -85,10 +68,10 @@ public abstract class BaseRESTRepository {
         return r;
       }
     }
-    logger.warn("No renderer configured for any of media types requested: {}, responding with the error status", mediaType);
-    throw new WebApplicationException(Response.notAcceptable(supportedMediaTypes)
-        .entity(format("Unsupported value of 'Accept' header: %s (supported values are %s)", mediaType, rendererByMediaType.keySet()))
-        .build());
+    logger
+      .warn("No renderer configured for any of media types requested: {}, responding with the error status", mediaType);
+    throw new WebApplicationException(Response.notAcceptable(supportedMediaTypes).entity(
+      format("Unsupported value of 'Accept' header: %s (supported values are %s)", mediaType,
+        rendererByMediaType.keySet())).build());
   }
-
 }

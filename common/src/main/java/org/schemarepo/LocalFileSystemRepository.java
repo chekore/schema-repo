@@ -1,21 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 package org.schemarepo;
 
 import java.io.BufferedWriter;
@@ -42,12 +24,13 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Scanner;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.schemarepo.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
 
 /**
  * A {@link Repository} that persists content to file. <br/>
@@ -69,13 +52,11 @@ import org.slf4j.LoggerFactory;
  */
 public class LocalFileSystemRepository extends AbstractBackendRepository {
 
-  private final Logger logger = LoggerFactory.getLogger(getClass());
-
   private static final String LOCKFILE = ".repo.lock";
   private static final String SUBJECT_PROPERTIES = "subject.properties";
   private static final String SCHEMA_IDS = "schema_ids";
   private static final String SCHEMA_POSTFIX = ".schema";
-
+  private final Logger logger = LoggerFactory.getLogger(getClass());
   private final File rootDir;
   private final FileChannel lockChannel;
   private final FileLock fileLock;
@@ -96,29 +77,96 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
     this.rootDir = new File(repoPath);
     if ((!rootDir.exists() && !rootDir.mkdirs()) || !rootDir.isDirectory()) {
       throw new java.lang.RuntimeException(
-          "Unable to create repo directory, or not a directory: "
-              + rootDir.getAbsolutePath());
+        "Unable to create repo directory, or not a directory: " + rootDir.getAbsolutePath());
     }
     // lock repository
     try {
       File lockfile = new File(rootDir, LOCKFILE);
       lockfile.createNewFile();
       @SuppressWarnings("resource") // raf is closed when lockChannel is closed
-      RandomAccessFile raf = new RandomAccessFile(lockfile, "rw");
+        RandomAccessFile raf = new RandomAccessFile(lockfile, "rw");
       lockChannel = raf.getChannel();
       fileLock = lockChannel.tryLock();
       if (fileLock != null) {
         lockfile.deleteOnExit();
       } else {
-        throw new IllegalStateException("Failed to lock file: "
-            + lockfile.getAbsolutePath());
+        throw new IllegalStateException("Failed to lock file: " + lockfile.getAbsolutePath());
       }
     } catch (IOException e) {
-      throw new IllegalStateException("Unable to lock repository directory: "
-          + rootDir.getAbsolutePath(), e);
+      throw new IllegalStateException("Unable to lock repository directory: " + rootDir.getAbsolutePath(), e);
     }
     // eagerly load up subjects
     loadSubjects(rootDir, subjectCache);
+  }
+
+  private static File createNewFileInDir(File dir, String filename) {
+    File result = new File(dir, filename);
+    try {
+      if (!result.createNewFile()) {
+        throw new RuntimeException(result.getAbsolutePath() + " already exists");
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to create file: " + result.getAbsolutePath(), e);
+    }
+    return result;
+  }
+
+  private static void writeToFile(File file, WriteOp op, boolean append) {
+    FileOutputStream out;
+    try {
+      out = new FileOutputStream(file, append);
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException("Could not open file for write: " + file.getAbsolutePath());
+    }
+    try {
+      OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
+      BufferedWriter bwriter = new BufferedWriter(writer);
+      op.write(bwriter);
+      bwriter.flush();
+      bwriter.close();
+      writer.close();
+      out.close();
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to write and close file " + file.getAbsolutePath());
+    }
+  }
+
+  private static void writePropertyFile(File file, final Properties prop) {
+    writeToFile(file, new WriteOp() {
+      @Override
+      protected void write(Writer writer)
+        throws IOException {
+        prop.store(writer, "Schema Repository Subject Properties");
+      }
+    }, false);
+  }
+
+  private static void appendLineToFile(File file, final String line) {
+    writeToFile(file, new WriteOp() {
+      @Override
+      protected void write(Writer writer)
+        throws IOException {
+        writer.append(line).append('\n');
+      }
+    }, true);
+  }
+
+  private static void dirExists(File dir) {
+    if (!dir.exists() || !dir.isDirectory()) {
+      throw new RuntimeException("directory does not exist or is not a directory: " + dir.toString());
+    }
+  }
+
+  private static void fileReadable(File file) {
+    if (!file.canRead()) {
+      throw new RuntimeException("file does not exist or is not readable: " + file.toString());
+    }
+  }
+
+  private static void fileWriteable(File file) {
+    if (!file.canWrite()) {
+      throw new RuntimeException("file does not exist or is not writeable: " + file.toString());
+    }
   }
 
   private void loadSubjects(File repoDir, SubjectCache subjects) {
@@ -165,12 +213,10 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
     final File subjectDir = new File(rootDir, subjectName);
     if (subjectDir.exists()) {
       throw new RuntimeException(
-          "Cannot create a FileSubject, directory already exists: "
-              + subjectDir.getAbsolutePath());
+        "Cannot create a FileSubject, directory already exists: " + subjectDir.getAbsolutePath());
     }
     if (!subjectDir.mkdir()) {
-      throw new RuntimeException("Cannot create a FileSubject dir: "
-          + subjectDir.getAbsolutePath());
+      throw new RuntimeException("Cannot create a FileSubject dir: " + subjectDir.getAbsolutePath());
     }
 
     createNewFileInDir(subjectDir, SCHEMA_IDS);
@@ -181,81 +227,6 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
     writePropertyFile(subjectProperties, props);
   }
 
-  private static File createNewFileInDir(File dir, String filename) {
-    File result = new File(dir, filename);
-    try {
-      if (!result.createNewFile()) {
-        throw new RuntimeException(result.getAbsolutePath() + " already exists");
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to create file: "
-          + result.getAbsolutePath(), e);
-    }
-    return result;
-  }
-
-  private static void writeToFile(File file, WriteOp op, boolean append) {
-    FileOutputStream out;
-    try {
-      out = new FileOutputStream(file, append);
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException("Could not open file for write: "
-          + file.getAbsolutePath());
-    }
-    try {
-      OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
-      BufferedWriter bwriter = new BufferedWriter(writer);
-      op.write(bwriter);
-      bwriter.flush();
-      bwriter.close();
-      writer.close();
-      out.close();
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to write and close file "
-          + file.getAbsolutePath());
-    }
-  }
-
-  private static void writePropertyFile(File file, final Properties prop) {
-    writeToFile(file, new WriteOp() {
-      @Override
-      protected void write(Writer writer) throws IOException {
-        prop.store(writer, "Schema Repository Subject Properties");
-      }
-    }, false);
-  }
-
-  private static void appendLineToFile(File file, final String line) {
-    writeToFile(file, new WriteOp() {
-      @Override
-      protected void write(Writer writer) throws IOException {
-        writer.append(line).append('\n');
-      }
-    }, true);
-  }
-
-  private static void dirExists(File dir) {
-    if (!dir.exists() || !dir.isDirectory()) {
-      throw new RuntimeException(
-          "directory does not exist or is not a directory: " + dir.toString());
-    }
-  }
-
-  private static void fileReadable(File file) {
-    if (!file.canRead()) {
-      throw new RuntimeException("file does not exist or is not readable: "
-          + file.toString());
-    }
-  }
-
-  private static void fileWriteable(File file) {
-    if (!file.canWrite()) {
-      throw new RuntimeException("file does not exist or is not writeable: "
-          + file.toString());
-    }
-  }
-
-
   @Override
   protected Map<String, String> exposeConfiguration() {
     final Map<String, String> properties = new LinkedHashMap<String, String>(super.exposeConfiguration());
@@ -264,7 +235,8 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
   }
 
   private abstract static class WriteOp {
-    protected abstract void write(Writer writer) throws IOException;
+    protected abstract void write(Writer writer)
+      throws IOException;
   }
 
   private class FileSubject extends Subject {
@@ -300,26 +272,21 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
             largestId = id;
           }
           lastId = id;
-          if(!foundIds.add(id)) {
-            throw new RuntimeException("Corrupt id file, id '" + id +
-                "' duplicated in " + idFile.getAbsolutePath());
+          if (!foundIds.add(id)) {
+            throw new RuntimeException("Corrupt id file, id '" + id + "' duplicated in " + idFile.getAbsolutePath());
           }
           fileReadable(getSchemaFile(id));
           schemaFileNames.remove(getSchemaFileName(id));
         }
         if (schemaFileNames.size() > 0) {
-          throw new RuntimeException("Schema files found in subject directory "
-              + subjectDir.getAbsolutePath()
-              + " that are not referenced in the " + SCHEMA_IDS + " file: "
-              + schemaFileNames.toString());
+          throw new RuntimeException("Schema files found in subject directory " + subjectDir.getAbsolutePath()
+            + " that are not referenced in the " + SCHEMA_IDS + " file: " + schemaFileNames.toString());
         }
         if (lastId != null) {
-          latest = new SchemaEntry(lastId.toString(),
-              readSchemaForId(lastId.toString()));
+          latest = new SchemaEntry(lastId.toString(), readSchemaForId(lastId.toString()));
         }
       } catch (IOException e) {
-        throw new RuntimeException("error initializing subject: "
-            + subjectDir.getAbsolutePath(), e);
+        throw new RuntimeException("error initializing subject: " + subjectDir.getAbsolutePath(), e);
       }
     }
 
@@ -330,7 +297,7 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
 
     @Override
     public synchronized SchemaEntry register(String schema)
-        throws SchemaValidationException {
+      throws SchemaValidationException {
       isValid();
       RepositoryUtil.validateSchemaOrSubject(schema);
       SchemaEntry entry = lookupBySchema(schema);
@@ -361,25 +328,21 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
           return latest;
         } else {
           throw new RuntimeException(
-              "Unable to register schema, schema file either exists already "
-                  + " or couldn't create new file");
+            "Unable to register schema, schema file either exists already " + " or couldn't create new file");
         }
       } catch (NumberFormatException e) {
-        throw new RuntimeException(
-            "Unable to register schema, invalid schema latest schema id ", e);
+        throw new RuntimeException("Unable to register schema, invalid schema latest schema id ", e);
       } catch (IOException e) {
-        throw new RuntimeException(
-            "Unable to register schema, couldn't create schema file ", e);
+        throw new RuntimeException("Unable to register schema, couldn't create schema file ", e);
       }
-
     }
 
     @Override
-    public synchronized SchemaEntry registerIfLatest(String schema,
-        SchemaEntry latest) throws SchemaValidationException {
+    public synchronized SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
+      throws SchemaValidationException {
       isValid();
       if (latest == this.latest // both null
-          || (latest != null && latest.equals(this.latest))) {
+        || (latest != null && latest.equals(this.latest))) {
         return register(schema);
       } else {
         return null;
@@ -421,9 +384,9 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
       isValid();
       List<SchemaEntry> entries = new ArrayList<SchemaEntry>();
       for (Integer id : getSchemaIds()) {
-          String idStr = id.toString();
-          String schema = readSchemaForId(idStr);
-          entries.add(new SchemaEntry(idStr, schema));
+        String idStr = id.toString();
+        String schema = readSchemaForId(idStr);
+        entries.add(new SchemaEntry(idStr, schema));
       }
       Collections.reverse(entries);
       return entries;
@@ -451,20 +414,18 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
       try {
         return readAllAsString(schemaFile);
       } catch (FileNotFoundException e) {
-        throw new RuntimeException(
-            "Could not read schema contents at: "
-                + schemaFile.getAbsolutePath(), e);
+        throw new RuntimeException("Could not read schema contents at: " + schemaFile.getAbsolutePath(), e);
       }
     }
 
-    private String readAllAsString(File file) throws FileNotFoundException {
+    private String readAllAsString(File file)
+      throws FileNotFoundException {
       // a scanner that will read a whole file
       Scanner s = new Scanner(file, "UTF-8").useDelimiter("\\A");
       try {
         return s.next();
       } catch (NoSuchElementException e) {
-        throw new RuntimeException(
-            "file is empty: " + file.getAbsolutePath(), e);
+        throw new RuntimeException("file is empty: " + file.getAbsolutePath(), e);
       } finally {
         s.close();
       }
@@ -478,18 +439,18 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
             return true;
           }
           return false;
-         }
+        }
       });
       return new HashSet<String>(Arrays.asList(files));
     }
 
     // schema ids from the schema id file, in order from oldest to newest
-    private List<Integer> getSchemaIds(){
+    private List<Integer> getSchemaIds() {
       Scanner s = getIdFileScanner();
       List<Integer> ids = new ArrayList<Integer>();
       try {
         while (s.hasNextLine()) {
-          if(s.hasNext()) {
+          if (s.hasNext()) {
             // only read non-empty lines
             ids.add(s.nextInt());
           }
@@ -505,8 +466,7 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
       try {
         return new Scanner(idFile, "UTF-8");
       } catch (FileNotFoundException e) {
-        throw new RuntimeException("Unable to read schema id file: "
-            + idFile.getAbsolutePath(), e);
+        throw new RuntimeException("Unable to read schema id file: " + idFile.getAbsolutePath(), e);
       }
     }
 
@@ -525,7 +485,5 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
     private String getSchemaFileName(int id) {
       return getSchemaFileName(String.valueOf(id));
     }
-
   }
-
 }

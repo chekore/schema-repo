@@ -1,21 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 package org.schemarepo.api;
 
 import java.util.HashMap;
@@ -32,6 +14,7 @@ import org.schemarepo.api.converter.Converter;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
+
 
 /**
  * This is a convenience class for interacting with a Schema Repository in an
@@ -57,12 +40,8 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
 
   // Constructors
 
-  public TypedSchemaRepository(
-          Repository repo,
-          Converter<ID> idConverter,
-          Converter<SCHEMA> schemaConverter,
-          Converter<SUBJECT> subjectConverter,
-          SubjectConfig.Builder defaultSubjectConfigBuilder) {
+  public TypedSchemaRepository(Repository repo, Converter<ID> idConverter, Converter<SCHEMA> schemaConverter,
+    Converter<SUBJECT> subjectConverter, SubjectConfig.Builder defaultSubjectConfigBuilder) {
     this.repo = repo;
     this.convertId = idConverter;
     this.convertSchema = schemaConverter;
@@ -71,13 +50,9 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
     this.subjectToIdToSchemaCache = new HashMap<SUBJECT, BiMap<ID, SCHEMA>>();
   }
 
-  public TypedSchemaRepository(
-          Repository repo,
-          Converter<ID> idConverter,
-          Converter<SCHEMA> schemaConverter,
-          Converter<SUBJECT> subjectConverter) {
-    this(repo, idConverter, schemaConverter, subjectConverter,
-            new SubjectConfig.Builder());
+  public TypedSchemaRepository(Repository repo, Converter<ID> idConverter, Converter<SCHEMA> schemaConverter,
+    Converter<SUBJECT> subjectConverter) {
+    this(repo, idConverter, schemaConverter, subjectConverter, new SubjectConfig.Builder());
   }
 
   /**
@@ -110,7 +85,7 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
    * @param subjectName of the desired schemaToIdCache
    * @return the schemaToIdCache for the requested subject
    */
-  private BiMap<SCHEMA, ID> getSchemaToIdCache(SUBJECT subjectName){
+  private BiMap<SCHEMA, ID> getSchemaToIdCache(SUBJECT subjectName) {
     return getIdToSchemaCache(subjectName).inverse(); // Ensures initialization
   }
 
@@ -246,17 +221,15 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
    * @return the ID of the registered schema
    * @throws SchemaValidationException
    */
-  public ID registerSchema(SUBJECT subjectName,
-                           SCHEMA schema)
-          throws SchemaValidationException {
+  public ID registerSchema(SUBJECT subjectName, SCHEMA schema)
+    throws SchemaValidationException {
     Map<SCHEMA, ID> schemaToIdCache = getSchemaToIdCache(subjectName);
     ID id = schemaToIdCache.get(schema);
 
     if (id == null) {
       Subject subject = repo.lookup(convertSubject.toString(subjectName));
       if (subject == null) {
-        subject = repo.register(convertSubject.toString(subjectName),
-                defaultSubjectConfigBuilder.build());
+        subject = repo.register(convertSubject.toString(subjectName), defaultSubjectConfigBuilder.build());
       }
       /**
        * Implementation detail: The repo is expected to act as a synchronized,
@@ -313,7 +286,7 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
    */
   public List<SUBJECT> getSubjects() {
     List<SUBJECT> subjects = Lists.newArrayList();
-    for (Subject subject: repo.subjects()) {
+    for (Subject subject : repo.subjects()) {
       subjects.add(convertSubject.fromString(subject.getName()));
     }
     return subjects;

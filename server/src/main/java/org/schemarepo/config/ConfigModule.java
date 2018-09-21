@@ -1,28 +1,7 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 package org.schemarepo.config;
 
 import java.io.PrintStream;
 import java.util.Properties;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
 
 import org.schemarepo.CacheRepository;
 import org.schemarepo.Repository;
@@ -39,6 +18,10 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 
 /**
  * A {@link Module} for configuration based on a set of {@link Properties}
@@ -57,16 +40,16 @@ import com.google.inject.name.Names;
  */
 public class ConfigModule implements Module {
 
-  public static void printDefaults(PrintStream writer) {
-    writer.println(Config.DEFAULTS);
-  }
-
   private final Properties props;
 
   public ConfigModule(Properties props) {
     Properties copy = new Properties(Config.DEFAULTS);
     copy.putAll(props);
     this.props = copy;
+  }
+
+  public static void printDefaults(PrintStream writer) {
+    writer.println(Config.DEFAULTS);
   }
 
   @Override
@@ -76,9 +59,8 @@ public class ConfigModule implements Module {
 
   @Provides
   @Singleton
-  Repository provideRepository(Injector injector,
-      @Named(Config.REPO_CLASS) Class<Repository> repoClass,
-      @Named(Config.REPO_CACHE) Class<RepositoryCache> cacheClass) {
+  Repository provideRepository(Injector injector, @Named(Config.REPO_CLASS) Class<Repository> repoClass,
+    @Named(Config.REPO_CACHE) Class<RepositoryCache> cacheClass) {
     Repository repo = injector.getInstance(repoClass);
     RepositoryCache cache = injector.getInstance(cacheClass);
     return new CacheRepository(repo, cache);
@@ -86,14 +68,15 @@ public class ConfigModule implements Module {
 
   @Provides
   @Singleton
-  ValidatorFactory provideValidatorFactory(Injector injector, @Named(Config.DEFAULT_SUBJECT_VALIDATORS) String defaultSubjectValidators) {
+  ValidatorFactory provideValidatorFactory(Injector injector,
+    @Named(Config.DEFAULT_SUBJECT_VALIDATORS) String defaultSubjectValidators) {
     ValidatorFactory.Builder builder = new ValidatorFactory.Builder();
-    for(String prop : props.stringPropertyNames()) {
+    for (String prop : props.stringPropertyNames()) {
       if (prop.startsWith(Config.VALIDATOR_PREFIX)) {
         String validatorName = prop.substring(Config.VALIDATOR_PREFIX.length());
-        Class<Validator> validatorClass = injector.getInstance(
-            Key.<Class<Validator>>get(
-                new TypeLiteral<Class<Validator>>(){}, Names.named(prop)));
+        Class<Validator> validatorClass =
+          injector.getInstance(Key.<Class<Validator>>get(new TypeLiteral<Class<Validator>>() {
+          }, Names.named(prop)));
         builder.setValidator(validatorName, injector.getInstance(validatorClass));
       }
     }
@@ -105,8 +88,7 @@ public class ConfigModule implements Module {
 
   @Provides
   @Singleton
-  JsonUtil provideJsonUtil(Injector injector,
-      @Named(Config.JSON_UTIL_IMPLEMENTATION) Class<JsonUtil> jsonUtilClass) {
+  JsonUtil provideJsonUtil(Injector injector, @Named(Config.JSON_UTIL_IMPLEMENTATION) Class<JsonUtil> jsonUtilClass) {
     return injector.getInstance(jsonUtilClass);
   }
 

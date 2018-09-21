@@ -1,21 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied.  See the License for the specific language governing
- * permissions and limitations under the License.
- */
-
 package org.schemarepo.client;
 
 import java.io.StringReader;
@@ -23,10 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.MediaType;
 
 import org.schemarepo.BaseRepository;
 import org.schemarepo.RepositoryUtil;
@@ -41,6 +19,11 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.representation.Form;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.MediaType;
+
 
 /**
  * An Implementation of {@link org.schemarepo.Repository} that connects to a remote
@@ -68,11 +51,12 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
   @Override
   public Subject register(String subject, SubjectConfig config) {
     Form form = new Form();
-    for(Map.Entry<String, String> entry : RepositoryUtil.safeConfig(config).asMap().entrySet()) {
+    for (Map.Entry<String, String> entry : RepositoryUtil.safeConfig(config).asMap().entrySet()) {
       form.putSingle(entry.getKey(), entry.getValue());
     }
 
-    String regSubjectName = webResource.path(subject).type(MediaType.APPLICATION_FORM_URLENCODED).put(String.class, form);
+    String regSubjectName =
+      webResource.path(subject).type(MediaType.APPLICATION_FORM_URLENCODED).put(String.class, form);
 
     return new RESTSubject(regSubjectName);
   }
@@ -107,7 +91,6 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
     return webResource.path("status").get(String.class);
   }
 
-
   private class RESTSubject extends Subject {
 
     private RESTSubject(String name) {
@@ -116,7 +99,7 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
 
     @Override
     public SubjectConfig getConfig() {
-      String path = getName() + "/config" ;
+      String path = getName() + "/config";
       try {
         String propString = webResource.path(path).get(String.class);
         Properties props = new Properties();
@@ -128,7 +111,8 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
     }
 
     @Override
-    public SchemaEntry register(String schema) throws SchemaValidationException {
+    public SchemaEntry register(String schema)
+      throws SchemaValidationException {
       RepositoryUtil.validateSchemaOrSubject(schema);
 
       String path = getName() + "/register";
@@ -137,7 +121,7 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
 
     @Override
     public SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
-        throws SchemaValidationException {
+      throws SchemaValidationException {
       RepositoryUtil.validateSchemaOrSubject(schema);
       String idStr = (latest == null) ? "" : latest.getId();
 
@@ -146,15 +130,14 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
     }
 
     private SchemaEntry handleRegisterRequest(String path, String schema)
-        throws SchemaValidationException {
+      throws SchemaValidationException {
       String schemaId;
       try {
         schemaId = webResource.path(path).type(MediaType.TEXT_PLAIN_TYPE).put(String.class, schema);
         return new SchemaEntry(schemaId, schema);
       } catch (UniformInterfaceException e) {
         ClientResponse cr = e.getResponse();
-        if (ClientResponse.Status.fromStatusCode(cr.getStatus()).equals(
-            ClientResponse.Status.FORBIDDEN)) {
+        if (ClientResponse.Status.fromStatusCode(cr.getStatus()).equals(ClientResponse.Status.FORBIDDEN)) {
           throw new SchemaValidationException("Invalid schema: " + schema + ". Reason: " + cr.getEntity(String.class));
         } else {
           //any other status should return null
@@ -222,11 +205,9 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
         String path = getName() + "/integral";
         String integral = webResource.path(path).get(String.class);
         return Boolean.parseBoolean(integral);
-      } catch (UniformInterfaceException e){
+      } catch (UniformInterfaceException e) {
         return false;
       }
     }
-
   }
-
 }
