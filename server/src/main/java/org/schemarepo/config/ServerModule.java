@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServlet;
  * @author zhizhou.ren
  */
 public class ServerModule extends JerseyServletModule {
-  private static Server server = new Server();
+  private Server server = new Server();
 
   @Override
   protected void configureServlets() {
@@ -38,7 +38,7 @@ public class ServerModule extends JerseyServletModule {
     // for debug
     // initParams.put("com.sun.jersey.config.feature.Trace", "true");
     initParams.put("com.sun.jersey.api.json.POJOMappingFeature", "true");
-    bind(Connector.class).toInstance(new ServerConnector(server));
+    bind(Connector.class).toInstance(new ServerConnector(this.server));
     serve("/*").with(GuiceContainer.class, initParams);
     bind(MachineOrientedRESTRepository.class);
     bind(HumanOrientedRESTRepository.class);
@@ -58,7 +58,7 @@ public class ServerModule extends JerseyServletModule {
     configuration.setResponseHeaderSize(bufferSize);
 
     HttpConnectionFactory factory = new HttpConnectionFactory(configuration);
-    Server server = ServerModule.server;
+    Server server = this.server;
     ServerConnector serverConnector = (ServerConnector) connector;
     serverConnector.addConnectionFactory(factory);
     if (null != host && !host.isEmpty()) {
