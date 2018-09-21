@@ -87,7 +87,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- version properties for dependencies -->
-    <jetty-8.version>9.4.12.v20180830</jetty-8.version>
+    <jetty-9.version>9.4.12.v20180830</jetty-9.version>
     <servlet-api.version>2.5</servlet-api.version>
     <el-impl.version>1.1</el-impl.version>
     <jersey.version>1.19.4</jersey.version>
@@ -126,22 +126,22 @@
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-servlet</artifactId>
-        <version>${jetty-8.version}</version>
+        <version>${jetty-9.version}</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-webapp</artifactId>
-        <version>${jetty-8.version}</version>
+        <version>${jetty-9.version}</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-jsp</artifactId>
-        <version>${jetty-8.version}</version>
+        <version>${jetty-9.version}</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-server</artifactId>
-        <version>${jetty-8.version}</version>
+        <version>${jetty-9.version}</version>
       </dependency>
       <dependency>
         <groupId>com.google.inject</groupId>
