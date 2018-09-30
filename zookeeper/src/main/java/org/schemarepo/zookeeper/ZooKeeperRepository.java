@@ -3,6 +3,7 @@ package org.schemarepo.zookeeper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -390,16 +391,13 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
         if (rawContent == null || rawContent.length == 0) {
           return null;
         } else {
-          String tmp = new String(rawContent, "UTF-8");
+          String tmp = new String(rawContent, StandardCharsets.UTF_8);
           if (tmp.endsWith("\n")) {
             return tmp.substring(0, tmp.lastIndexOf("\n"));
           } else {
             return tmp;
           }
         }
-      } catch (KeeperException.NoNodeException e) {
-        // The schema for this ID does not exist in ZK.
-        return null;
       } catch (Exception e) {
         throw new RuntimeException("An exception occurred while accessing ZK!", e);
       }
@@ -439,6 +437,28 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
 
         // TODO: Keep new schema in a local cache
         return new SchemaEntry(String.valueOf(newId), schema);
+      } catch (Exception e) {
+        throw new RuntimeException("An exception occurred while accessing ZK!", e);
+      }
+    }
+
+    /**
+     * Delete the schema of registered with the given id
+     *
+     * @param schemaId the id of the schema to delete
+     * @return
+     */
+    private synchronized boolean deleteSchemaById(String schemaId) {
+      try {
+        List<Integer> allSchemaIds = getSchemaIds();
+        allSchemaIds.remove(Integer.valueOf(schemaId));
+        // Delete schema and update schema IDs file in one ZK transaction
+        zkClient.inTransaction().
+          delete().forPath(getSchemaFilePath(schemaId)).
+          and().
+          setData().forPath(getSchemaIdsFilePath(), serializeSchemaIds(allSchemaIds).getBytes()).
+          and().commit();
+        return true;
       } catch (Exception e) {
         throw new RuntimeException("An exception occurred while accessing ZK!", e);
       }
@@ -509,6 +529,19 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       }
     }
 
+    public boolean delete(String schemaId) {
+      RepositoryUtil.validateSchemaOrSubject(schemaId);
+      SchemaEntry entry = lookupBySchema(schemaId);
+      if (entry == null) {
+        throw new RuntimeException("The Schema does not exist in ZK!");
+      } else {
+        acquireLock();
+        boolean tag = deleteSchemaById(schemaId);
+        releaseLock();
+        return tag;
+      }
+    }
+
     /**
      * Register the provided schema only if the current latest schema matches the
      * provided latest entry.
@@ -529,7 +562,7 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       if (latest == latestInZk || (latest != null && latest.equals(latestInZk))) {
         return register(schema);
       } else {
-        return null;
+        throw new SchemaValidationException("The schema does not exist in ZK!");
       }
     }
 
