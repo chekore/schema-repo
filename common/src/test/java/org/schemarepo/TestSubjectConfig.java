@@ -13,9 +13,8 @@ public class TestSubjectConfig {
     SubjectConfig conf = SubjectConfig.emptyConfig();
     Assert.assertTrue(conf.getValidators().isEmpty());
 
-    SubjectConfig custom =
-      new SubjectConfig.Builder().set("k", "v").set("repo.validators", "valid1, valid2 ,,").addValidator("oneMore")
-        .build();
+    SubjectConfig custom = new SubjectConfig.Builder().set("k", "v").set("repo.validators", "valid1, valid2 ,,")
+        .addValidator("oneMore").build();
 
     Assert.assertEquals("v", custom.get("k"));
     Set<String> validators = custom.getValidators();

@@ -13,9 +13,8 @@ public class TestAvro1124RESTRepositoryClient extends AbstractTestRESTRepository
 
   @Test
   @Ignore("This test is skipped because we know the old client is broken "
-    + "when calling allEntries() for schemas with new lines.")
-  public void testAllEntriesMultiLineSchema()
-    throws Exception {
+      + "when calling allEntries() for schemas with new lines.")
+  public void testAllEntriesMultiLineSchema() throws Exception {
     // Skipped
   }
 }

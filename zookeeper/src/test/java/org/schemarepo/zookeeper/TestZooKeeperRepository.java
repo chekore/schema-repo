@@ -36,12 +36,12 @@ public class TestZooKeeperRepository extends AbstractTestPersistentRepository<Zo
       // testingClusterConnectionString = "localhost:2181";
 
       RetryPolicy retryPolicy = new RetryNTimes(Config.getIntDefault(Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES),
-        Config.getIntDefault(Config.ZK_CURATOR_NUMBER_OF_RETRIES));
+          Config.getIntDefault(Config.ZK_CURATOR_NUMBER_OF_RETRIES));
       CuratorFrameworkFactory.Builder cffBuilder =
-        CuratorFrameworkFactory.builder().connectString(testingClusterConnectionString)
-          .sessionTimeoutMs(Config.getIntDefault(Config.ZK_SESSION_TIMEOUT))
-          .connectionTimeoutMs(Config.getIntDefault(Config.ZK_CONNECTION_TIMEOUT)).retryPolicy(retryPolicy)
-          .defaultData(new byte[0]);
+          CuratorFrameworkFactory.builder().connectString(testingClusterConnectionString)
+              .sessionTimeoutMs(Config.getIntDefault(Config.ZK_SESSION_TIMEOUT))
+              .connectionTimeoutMs(Config.getIntDefault(Config.ZK_CONNECTION_TIMEOUT)).retryPolicy(retryPolicy)
+              .defaultData(new byte[0]);
 
       zkClient = cffBuilder.build();
       zkClient.start();
@@ -59,8 +59,7 @@ public class TestZooKeeperRepository extends AbstractTestPersistentRepository<Zo
   }
 
   @After
-  public void cleanUp()
-    throws IOException {
+  public void cleanUp() throws IOException {
     try {
       zkClient.delete().deletingChildrenIfNeeded().forPath(REPO_PATH);
     } catch (Exception e) {
@@ -77,8 +76,8 @@ public class TestZooKeeperRepository extends AbstractTestPersistentRepository<Zo
 
   private ZooKeeperRepository newRepo(String path) {
     return new ZooKeeperRepository(testingClusterConnectionString, path,
-      Config.getIntDefault(Config.ZK_CONNECTION_TIMEOUT), Config.getIntDefault(Config.ZK_SESSION_TIMEOUT),
-      Config.getIntDefault(Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES),
-      Config.getIntDefault(Config.ZK_CURATOR_NUMBER_OF_RETRIES), new ValidatorFactory.Builder().build());
+        Config.getIntDefault(Config.ZK_CONNECTION_TIMEOUT), Config.getIntDefault(Config.ZK_SESSION_TIMEOUT),
+        Config.getIntDefault(Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES),
+        Config.getIntDefault(Config.ZK_CURATOR_NUMBER_OF_RETRIES), new ValidatorFactory.Builder().build());
   }
 }

@@ -9,8 +9,7 @@ import org.schemarepo.InMemoryRepository;
 public class TestRepo {
 
   @Test
-  public void testRepoInit()
-    throws Exception {
+  public void testRepoInit() throws Exception {
     Properties props = new Properties();
     props.setProperty("schema-repo.class", InMemoryRepository.class.getName());
     props.setProperty("schema-repo.jetty.port", "6782");

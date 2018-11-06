@@ -18,14 +18,13 @@ public class TestValidatingSubject {
 
   @Before
   public void setUpRepository() {
-    repo = new InMemoryRepository(new ValidatorFactory.Builder().
-      setValidator(ACCEPT_VALIDATOR, new Validator() {
-        @Override
-        public void validate(String schemaToValidate, Iterable<SchemaEntry> schemasInOrder)
+    repo = new InMemoryRepository(new ValidatorFactory.Builder().setValidator(ACCEPT_VALIDATOR, new Validator() {
+      @Override
+      public void validate(String schemaToValidate, Iterable<SchemaEntry> schemasInOrder)
           throws SchemaValidationException {
-          // nothing
-        }
-      }).build());
+        // nothing
+      }
+    }).build());
   }
 
   @After
@@ -34,8 +33,7 @@ public class TestValidatingSubject {
   }
 
   @Test
-  public void testSuccessfulValidation()
-    throws SchemaValidationException {
+  public void testSuccessfulValidation() throws SchemaValidationException {
 
     Subject accept = repo.register(ACCEPT, new SubjectConfig.Builder().addValidator(ACCEPT_VALIDATOR).build());
 
@@ -52,22 +50,20 @@ public class TestValidatingSubject {
   @Test
   public void testValidatorConstruction() {
     Assert.assertNull("Must pass null through Subject.validateWith()",
-      Subject.validatingSubject(null, new ValidatorFactory.Builder().build()));
+        Subject.validatingSubject(null, new ValidatorFactory.Builder().build()));
   }
 
   @Test(expected = SchemaValidationException.class)
-  public void testCannotRegister()
-    throws SchemaValidationException {
+  public void testCannotRegister() throws SchemaValidationException {
     Subject reject =
-      repo.register(REJECT, new SubjectConfig.Builder().addValidator(ValidatorFactory.REJECT_VALIDATOR).build());
+        repo.register(REJECT, new SubjectConfig.Builder().addValidator(ValidatorFactory.REJECT_VALIDATOR).build());
     reject.register(FOO);
   }
 
   @Test(expected = SchemaValidationException.class)
-  public void testCannotRegisterIfLatest()
-    throws SchemaValidationException {
+  public void testCannotRegisterIfLatest() throws SchemaValidationException {
     Subject reject =
-      repo.register(REJECT, new SubjectConfig.Builder().addValidator(ValidatorFactory.REJECT_VALIDATOR).build());
+        repo.register(REJECT, new SubjectConfig.Builder().addValidator(ValidatorFactory.REJECT_VALIDATOR).build());
     reject.registerIfLatest(FOO, null);
   }
 }

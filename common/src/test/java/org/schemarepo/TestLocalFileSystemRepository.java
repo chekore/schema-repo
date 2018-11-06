@@ -1,5 +1,7 @@
 package org.schemarepo;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -7,8 +9,6 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
-
-import static org.junit.Assert.assertTrue;
 
 
 public class TestLocalFileSystemRepository extends AbstractTestPersistentRepository<LocalFileSystemRepository> {
@@ -37,8 +37,7 @@ public class TestLocalFileSystemRepository extends AbstractTestPersistentReposit
   }
 
   @After
-  public void cleanUp()
-    throws Exception {
+  public void cleanUp() throws Exception {
     LoggerFactory.getLogger(getClass()).debug("Closing");
     getRepo().close();
     // see https://github.com/schema-repo/schema-repo/issues/12
@@ -60,16 +59,15 @@ public class TestLocalFileSystemRepository extends AbstractTestPersistentReposit
   }
 
   @Test
-  public void testPathHandling()
-    throws SchemaValidationException {
-    String paths[] = new String[]{"data", "data/", "/tmp/file_repo", "/tmp/file_repo/", "/tmp/file_repo/"};
+  public void testPathHandling() throws SchemaValidationException {
+    String paths[] = new String[] {"data", "data/", "/tmp/file_repo", "/tmp/file_repo/", "/tmp/file_repo/"};
 
     for (String path : paths) {
       LocalFileSystemRepository r = newRepo(TEST_PATH + path);
       try {
         File expected = new File(TEST_PATH, path);
         assertTrue("Expected directory not created: " + expected.getAbsolutePath() + " for path: " + path,
-          expected.exists());
+            expected.exists());
       } finally {
         r.close();
         // should be ok to call close twice
@@ -82,8 +80,7 @@ public class TestLocalFileSystemRepository extends AbstractTestPersistentReposit
   }
 
   @Test(expected = RuntimeException.class)
-  public void testInvalidDir()
-    throws IOException {
+  public void testInvalidDir() throws IOException {
     String badPath = TEST_PATH + "/bad";
     new File(TEST_PATH).mkdirs();
     new File(badPath).createNewFile();

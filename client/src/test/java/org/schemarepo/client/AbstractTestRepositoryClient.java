@@ -13,8 +13,7 @@ public abstract class AbstractTestRepositoryClient<R extends RepositoryClient> e
   protected RepositoryServer server;
 
   @Override
-  protected R createRepository()
-    throws Exception {
+  protected R createRepository() throws Exception {
     Properties props = new Properties();
     props.put(Config.REPO_CLASS, InMemoryRepository.class.getName());
     props.put(Config.JETTY_HOST, "localhost");
@@ -28,8 +27,7 @@ public abstract class AbstractTestRepositoryClient<R extends RepositoryClient> e
   protected abstract R createClient(String repoUrl);
 
   @Override
-  public void tearDownRepository()
-    throws Exception {
+  public void tearDownRepository() throws Exception {
     server.stop();
     super.tearDownRepository();
   }

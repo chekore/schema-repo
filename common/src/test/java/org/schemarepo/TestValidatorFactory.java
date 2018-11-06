@@ -9,13 +9,11 @@ import org.junit.Test;
 public class TestValidatorFactory {
 
   @Test
-  public void test()
-    throws SchemaValidationException {
+  public void test() throws SchemaValidationException {
     Validator foo = new Validator() {
       @Override
       public void validate(String schemaToValidate, Iterable<SchemaEntry> schemasInOrder)
-        throws SchemaValidationException {
-      }
+          throws SchemaValidationException {}
     };
 
     ValidatorFactory fact = new ValidatorFactory.Builder().setValidator("foo", foo).build();

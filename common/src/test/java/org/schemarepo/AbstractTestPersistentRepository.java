@@ -5,13 +5,12 @@ import org.junit.Test;
 
 
 /**
- * This extension of {@link AbstractTestRepository} includes tests that close
- * a schema repository and re-open it, to make sure persistence works correctly.
+ * This extension of {@link AbstractTestRepository} includes tests that close a
+ * schema repository and re-open it, to make sure persistence works correctly.
  */
 public abstract class AbstractTestPersistentRepository<R extends Repository> extends AbstractTestRepository<R> {
   @Test
-  public void testWriteCloseRead()
-    throws Exception {
+  public void testWriteCloseRead() throws Exception {
     try {
       repo.register("sub1", null).register("sc1");
       repo.register("sub2", null).register("sc2");
@@ -19,7 +18,8 @@ public abstract class AbstractTestPersistentRepository<R extends Repository> ext
     } finally {
       repo.close();
     }
-    // Calling close() and createRepository() is like bouncing the repo, to ensure its state persists.
+    // Calling close() and createRepository() is like bouncing the repo, to ensure
+    // its state persists.
     repo = createRepository();
     try {
       Subject s1 = repo.lookup("sub1");
@@ -44,8 +44,7 @@ public abstract class AbstractTestPersistentRepository<R extends Repository> ext
   }
 
   @Test
-  public void testWriteCloseReadMultiLineSchema()
-    throws Exception {
+  public void testWriteCloseReadMultiLineSchema() throws Exception {
     String endOfLine = System.getProperty("line.separator");
 
     String multiLineSchema1 = "first line" + endOfLine + "second line";
@@ -57,7 +56,8 @@ public abstract class AbstractTestPersistentRepository<R extends Repository> ext
     } finally {
       repo.close();
     }
-    // Calling close() and createRepository() is like bouncing the repo, to ensure its state persists.
+    // Calling close() and createRepository() is like bouncing the repo, to ensure
+    // its state persists.
     repo = createRepository();
     try {
       Subject s1 = repo.lookup("sub1");

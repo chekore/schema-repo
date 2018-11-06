@@ -26,8 +26,7 @@ public class TestReadOnlyRepository {
   }
 
   @Test
-  public void testReadOnlyRepository()
-    throws SchemaValidationException {
+  public void testReadOnlyRepository() throws SchemaValidationException {
 
     // lookup a subject that does not exist, when none do
     Subject none = readOnlyRepo.lookup(SUB);
@@ -80,15 +79,13 @@ public class TestReadOnlyRepository {
   }
 
   @Test(expected = IllegalStateException.class)
-  public void testCannotRegisterSchema()
-    throws SchemaValidationException {
+  public void testCannotRegisterSchema() throws SchemaValidationException {
     repo.register(FOO, null);
     readOnlyRepo.lookup(FOO).register(null);
   }
 
   @Test(expected = IllegalStateException.class)
-  public void testCannotRegisterSchemaIfLatest()
-    throws SchemaValidationException {
+  public void testCannotRegisterSchemaIfLatest() throws SchemaValidationException {
     repo.register(FOO, null);
     readOnlyRepo.lookup(FOO).registerIfLatest(null, null);
   }

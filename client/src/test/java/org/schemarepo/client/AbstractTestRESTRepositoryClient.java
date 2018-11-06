@@ -8,7 +8,8 @@ import org.schemarepo.config.Config;
 import org.schemarepo.server.RepositoryServer;
 
 
-public abstract class AbstractTestRESTRepositoryClient<R extends RepositoryClient> extends AbstractTestPersistentRepository<R> {
+public abstract class AbstractTestRESTRepositoryClient<R extends RepositoryClient>
+    extends AbstractTestPersistentRepository<R> {
 
   protected RepositoryServer server;
 
@@ -24,8 +25,7 @@ public abstract class AbstractTestRESTRepositoryClient<R extends RepositoryClien
    * @throws Exception
    */
   @Override
-  protected R createRepository()
-    throws Exception {
+  protected R createRepository() throws Exception {
     if (server == null) {
       Properties props = new Properties();
       props.put(Config.REPO_CLASS, InMemoryRepository.class.getName());
@@ -41,8 +41,7 @@ public abstract class AbstractTestRESTRepositoryClient<R extends RepositoryClien
   protected abstract R createClient(String repoUrl);
 
   @Override
-  public void tearDownRepository()
-    throws Exception {
+  public void tearDownRepository() throws Exception {
     server.stop();
     super.tearDownRepository();
   }

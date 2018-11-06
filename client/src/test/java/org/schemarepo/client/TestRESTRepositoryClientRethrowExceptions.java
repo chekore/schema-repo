@@ -1,19 +1,19 @@
 package org.schemarepo.client;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Properties;
 
 import org.junit.Test;
 import org.schemarepo.config.Config;
 import org.schemarepo.json.GsonJsonUtil;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 
 /**
- * Tests {@link RESTRepositoryClient} configured to rethrow any unexpected remote exception
- * encountered while talking to the server.
+ * Tests {@link RESTRepositoryClient} configured to rethrow any unexpected
+ * remote exception encountered while talking to the server.
  */
 public class TestRESTRepositoryClientRethrowExceptions extends AbstractTestRESTRepositoryClient<RESTRepositoryClient> {
 

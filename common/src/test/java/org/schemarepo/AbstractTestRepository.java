@@ -22,18 +22,15 @@ public abstract class AbstractTestRepository<R extends Repository> {
 
   protected R repo;
 
-  protected abstract R createRepository()
-    throws Exception;
+  protected abstract R createRepository() throws Exception;
 
   @Before
-  public void setUpRepository()
-    throws Exception {
+  public void setUpRepository() throws Exception {
     repo = createRepository();
   }
 
   @After
-  public void tearDownRepository()
-    throws Exception {
+  public void tearDownRepository() throws Exception {
     repo = null;
   }
 
@@ -42,8 +39,7 @@ public abstract class AbstractTestRepository<R extends Repository> {
   }
 
   @Test
-  public void testRepository()
-    throws SchemaValidationException {
+  public void testRepository() throws SchemaValidationException {
     // lookup a subject that does not exist, when none do
     Subject none = repo.lookup(SUB);
     Assert.assertNull("non-existent subject lookup should return null", none);
@@ -87,7 +83,7 @@ public abstract class AbstractTestRepository<R extends Repository> {
     // value when latest is null
     SchemaEntry didNotRegister = sub.registerIfLatest(FOO, new SchemaEntry("not", "there"));
     Assert.assertNull("registerIfLatest must return null if there are no schemas in the "
-      + "subject and the passed in latest is not null. Found: " + didNotRegister, didNotRegister);
+        + "subject and the passed in latest is not null. Found: " + didNotRegister, didNotRegister);
 
     // ensure registerIflatest works when latest is null
     SchemaEntry foo = sub.registerIfLatest(FOO, null);
@@ -108,7 +104,7 @@ public abstract class AbstractTestRepository<R extends Repository> {
     // ensure registerIfLatest does not register when provided null does not match
     SchemaEntry none4 = sub.registerIfLatest("none", null);
     Assert.assertNull("registerIfLatest must return null if there is a latest schema in"
-      + " the subject and the passed in value is null", none4);
+        + " the subject and the passed in value is null", none4);
 
     // ensure register can add new schemas
     SchemaEntry baz = sub.register(BAZ);
@@ -132,7 +128,7 @@ public abstract class AbstractTestRepository<R extends Repository> {
     Assert.assertTrue("AllEntries did not contain schema: " + FOO, foundfoo);
     Assert.assertTrue("AllEntries did not contain schema: " + BAR, foundbar);
 
-    //ensure order of allEntries is correct
+    // ensure order of allEntries is correct
     Iterator<SchemaEntry> allEntries = sub3.allEntries().iterator();
     // latest must match first one:
     Assert.assertEquals("Latest must be first returned from allEntries()", sub3.latest(), allEntries.next());
@@ -157,8 +153,7 @@ public abstract class AbstractTestRepository<R extends Repository> {
   }
 
   @Test
-  public void testAllEntriesMultiLineSchema()
-    throws Exception {
+  public void testAllEntriesMultiLineSchema() throws Exception {
     String endOfLine = System.getProperty("line.separator");
 
     String multiLineSchema1 = "first line" + endOfLine + "second line";

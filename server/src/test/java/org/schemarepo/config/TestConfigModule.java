@@ -2,6 +2,9 @@ package org.schemarepo.config;
 
 import java.util.Properties;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.schemarepo.InMemoryRepository;
@@ -11,9 +14,6 @@ import org.schemarepo.SchemaValidationException;
 import org.schemarepo.Subject;
 import org.schemarepo.SubjectConfig;
 import org.schemarepo.Validator;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 
 
 public class TestConfigModule {
@@ -44,7 +44,7 @@ public class TestConfigModule {
   public static class Reject implements Validator {
     @Override
     public void validate(String schemaToValidate, Iterable<SchemaEntry> schemasInOrder)
-      throws SchemaValidationException {
+        throws SchemaValidationException {
       throw new SchemaValidationException("no");
     }
   }
