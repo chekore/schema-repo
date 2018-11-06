@@ -7,8 +7,9 @@ import org.schemarepo.Subject;
 
 
 /**
- * Responsible for rendering various repository items (such as subjects and individual schemas)
- * based on a particular presentation technology (such as plain text, JSON, HTML, etc).
+ * Responsible for rendering various repository items (such as subjects and
+ * individual schemas) based on a particular presentation technology (such as
+ * plain text, JSON, HTML, etc).
  */
 public interface Renderer {
 

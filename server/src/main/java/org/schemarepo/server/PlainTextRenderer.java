@@ -2,15 +2,16 @@ package org.schemarepo.server;
 
 import java.util.Properties;
 
+import javax.ws.rs.core.MediaType;
+
 import org.schemarepo.RepositoryUtil;
 import org.schemarepo.SchemaEntry;
 import org.schemarepo.Subject;
 
-import javax.ws.rs.core.MediaType;
-
 
 /**
- * Renders as plain text. The actual work is delegated to utility class {@link org.schemarepo.RepositoryUtil}
+ * Renders as plain text. The actual work is delegated to utility class
+ * {@link org.schemarepo.RepositoryUtil}
  */
 public class PlainTextRenderer implements Renderer {
 

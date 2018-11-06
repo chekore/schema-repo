@@ -1,21 +1,21 @@
 package org.schemarepo.server;
 
+import static java.lang.String.format;
+import static javax.ws.rs.core.MediaType.WILDCARD;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.schemarepo.Repository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Variant;
 
-import static java.lang.String.format;
-import static javax.ws.rs.core.MediaType.WILDCARD;
+import org.schemarepo.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -58,7 +58,8 @@ public abstract class BaseRESTRepository {
   }
 
   protected Renderer getRenderer(String mediaType) {
-    // browsers usually send more than one type separated by comma, and each type may have parameters after semicolon
+    // browsers usually send more than one type separated by comma, and each type
+    // may have parameters after semicolon
     Renderer r;
     for (String singleMediaType : (mediaType == null || mediaType.isEmpty() ? WILDCARD : mediaType).split(", ?")) {
       singleMediaType = singleMediaType.split(";", 2)[0];
@@ -68,10 +69,11 @@ public abstract class BaseRESTRepository {
         return r;
       }
     }
-    logger
-      .warn("No renderer configured for any of media types requested: {}, responding with the error status", mediaType);
-    throw new WebApplicationException(Response.notAcceptable(supportedMediaTypes).entity(
-      format("Unsupported value of 'Accept' header: %s (supported values are %s)", mediaType,
-        rendererByMediaType.keySet())).build());
+    logger.warn("No renderer configured for any of media types requested: {}, responding with the error status",
+        mediaType);
+    throw new WebApplicationException(Response.notAcceptable(supportedMediaTypes)
+        .entity(format("Unsupported value of 'Accept' header: %s (supported values are %s)", mediaType,
+            rendererByMediaType.keySet()))
+        .build());
   }
 }

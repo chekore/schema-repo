@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.ws.rs.core.MediaType;
+
 import org.schemarepo.SchemaEntry;
 import org.schemarepo.Subject;
 import org.slf4j.Logger;
@@ -16,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import freemarker.cache.NullCacheStorage;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
-import javax.ws.rs.core.MediaType;
 
 
 /**
@@ -54,7 +55,7 @@ public class HTMLRenderer implements Renderer {
   @Override
   public String renderSchemaEntry(SchemaEntry schemaEntry, boolean requestForLatest) {
     return renderTemplate("Schema with ID = " + schemaEntry.getId() + (requestForLatest ? " (latest)" : ""),
-      "schemaEntry", Collections.singletonMap("schemaEntry", schemaEntry));
+        "schemaEntry", Collections.singletonMap("schemaEntry", schemaEntry));
   }
 
   @Override
