@@ -11,6 +11,9 @@ public class InMemorySubjectCache implements SubjectCache {
 
   @Override
   public Subject lookup(String name) {
+    if (name == null) {
+      throw new NullPointerException();
+    }
     return subjects.get(name);
   }
 
@@ -29,5 +32,18 @@ public class InMemorySubjectCache implements SubjectCache {
    */
   public Iterable<Subject> values() {
     return subjects.values();
+  }
+
+  @Override
+  public boolean remove(String name) {
+    if (name == null) {
+      throw new NullPointerException();
+    }
+    Subject subject = subjects.remove(name);
+    if (subject != null) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

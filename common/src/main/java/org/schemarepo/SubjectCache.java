@@ -32,4 +32,13 @@ public interface SubjectCache {
    *         Thread-safe.
    */
   Subject add(Subject entry);
+
+  /**
+   * Remove a {@Subject} by its name. Thread-safe
+   * 
+   * @param name
+   * @throws NullPointerException if the provided is null
+   * @return true or false
+   */
+  boolean remove(String name);
 }

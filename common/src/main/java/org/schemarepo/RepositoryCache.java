@@ -30,4 +30,12 @@ public class RepositoryCache implements SubjectCache {
   public Subject lookup(String name) {
     return subjects.lookup(name);
   }
+
+  @Override
+  public boolean remove(String name) {
+    if (name == null) {
+      throw new NullPointerException();
+    }
+    return subjects.remove(name);
+  }
 }
