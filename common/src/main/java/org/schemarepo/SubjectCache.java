@@ -10,16 +10,15 @@ package org.schemarepo;
  * created. However, a {@link Subject} can have its meta-data altered, so this
  * cannot be cached.
  * </p>
- * {@link #add(Subject)} and {@link #lookup(String)} must be thread-safe
- * with respect to each-other.
+ * {@link #add(Subject)} and {@link #lookup(String)} must be thread-safe with
+ * respect to each-other.
  */
 public interface SubjectCache {
   /**
    * Look up a {@link Subject} by its name. Thread-safe.
    *
    * @param name
-   * @throws NullPointerException
-   *           if the provided name is null
+   * @throws NullPointerException if the provided name is null
    */
   Subject lookup(String name);
 
@@ -27,10 +26,10 @@ public interface SubjectCache {
    * Add or update the {@link Subject} entry in this cache.
    *
    * @param entry
-   * @return the {@link Subject} that is in the cache after the call completes.
-   *         If the entry already exists this is the pre-existing value,
-   *         otherwise it is the value provided. If the value provided is null,
-   *         returns null. Thread-safe.
+   * @return the {@link Subject} that is in the cache after the call completes. If
+   *         the entry already exists this is the pre-existing value, otherwise it
+   *         is the value provided. If the value provided is null, returns null.
+   *         Thread-safe.
    */
   Subject add(Subject entry);
 }

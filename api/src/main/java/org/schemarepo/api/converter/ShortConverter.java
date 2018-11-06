@@ -4,8 +4,8 @@ package org.schemarepo.api.converter;
  * To convert back and forth with Short.
  *
  * For most people this can be a reasonable choice for IDs. If anyone needs to
- * store more than 65K schemas for a single subject, they should probably take
- * a long hard look at how they're using the schema repo.
+ * store more than 65K schemas for a single subject, they should probably take a
+ * long hard look at how they're using the schema repo.
  */
 public class ShortConverter implements Converter<Short> {
   @Override

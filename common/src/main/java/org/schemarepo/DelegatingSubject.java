@@ -19,14 +19,12 @@ public abstract class DelegatingSubject extends Subject {
   }
 
   @Override
-  public SchemaEntry register(String schema)
-    throws SchemaValidationException {
+  public SchemaEntry register(String schema) throws SchemaValidationException {
     return delegate.register(schema);
   }
 
   @Override
-  public SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
-    throws SchemaValidationException {
+  public SchemaEntry registerIfLatest(String schema, SchemaEntry latest) throws SchemaValidationException {
     return delegate.registerIfLatest(schema, latest);
   }
 

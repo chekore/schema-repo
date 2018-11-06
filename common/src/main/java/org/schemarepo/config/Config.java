@@ -15,7 +15,8 @@ public class Config {
   private static final String GLOBAL_PREFIX = "schema-repo.";
   // Validation class related configs
   public static final String VALIDATION_PREFIX = GLOBAL_PREFIX + "validation.";
-  // The default list of validator names (not including prefix) to use for validating subjects.
+  // The default list of validator names (not including prefix) to use for
+  // validating subjects.
   public static final String DEFAULT_SUBJECT_VALIDATORS = VALIDATION_PREFIX + "default.validators";
   public static final String REPO_CLASS = GLOBAL_PREFIX + "class";
   public static final String REPO_CACHE = GLOBAL_PREFIX + "cache";

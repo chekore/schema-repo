@@ -8,8 +8,8 @@ package org.schemarepo;
  * are not safe to cache.
  * </p>
  * <p>
- * In a {@link Subject} schemas are Strings and can not be null or empty.
- * See {@link RepositoryUtil#validateSchemaOrSubject(String)}
+ * In a {@link Subject} schemas are Strings and can not be null or empty. See
+ * {@link RepositoryUtil#validateSchemaOrSubject(String)}
  * </p>
  * {@link #add(SchemaEntry)}, {@link #lookupById(String)}, and
  * {@link #lookupBySchema(String)} must be thread-safe with respect to
@@ -20,29 +20,27 @@ public interface SchemaEntryCache {
   /**
    * Look up a schema entry by its full string form. Thread-safe.
    *
-   * @throws NullPointerException
-   *           If the provided schema is null
+   * @throws NullPointerException If the provided schema is null
    */
   SchemaEntry lookupBySchema(String schema);
 
   /**
    * Look up a schema entry by its id. Thread-safe.
    *
-   * @throws NullPointerException
-   *           If the provided id is null
+   * @throws NullPointerException If the provided id is null
    */
   SchemaEntry lookupById(String id);
 
   /**
    * Add the schema entry to this cache.
    *
-   * @param entry
-   *          schema entry to add. If the provided entry is null, returns null;
+   * @param entry schema entry to add. If the provided entry is null, returns
+   *              null;
    *
    * @return the {@link SchemaEntry} that is in the cache after the call
    *         completes. If the entry already exists the pre-existing value is
-   *         returned, otherwise the value returned is the entry provided. If
-   *         the provided entry is null, returns null. Thread-safe.
+   *         returned, otherwise the value returned is the entry provided. If the
+   *         provided entry is null, returns null. Thread-safe.
    */
   SchemaEntry add(SchemaEntry entry);
 

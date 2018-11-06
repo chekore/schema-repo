@@ -4,14 +4,14 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.schemarepo.SchemaEntry;
-import org.schemarepo.Subject;
-
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+
+import org.schemarepo.SchemaEntry;
+import org.schemarepo.Subject;
 
 
 /**
@@ -20,23 +20,21 @@ import com.google.gson.reflect.TypeToken;
 public class GsonJsonUtil implements JsonUtil {
 
   private static final Gson GSON_FOR_SUBJECTS =
-    new GsonBuilder().setPrettyPrinting().serializeNulls().setExclusionStrategies(new ExclusionStrategy() {
-      @Override
-      public boolean shouldSkipField(FieldAttributes fieldAttributes) {
-        // We're only interested in the name field for subjects
-        return (!"name".equals(fieldAttributes.getName()));
-      }
+      new GsonBuilder().setPrettyPrinting().serializeNulls().setExclusionStrategies(new ExclusionStrategy() {
+        @Override
+        public boolean shouldSkipField(FieldAttributes fieldAttributes) {
+          // We're only interested in the name field for subjects
+          return (!"name".equals(fieldAttributes.getName()));
+        }
 
-      @Override
-      public boolean shouldSkipClass(Class<?> aClass) {
-        return false;
-      }
-    }).create();
+        @Override
+        public boolean shouldSkipClass(Class<?> aClass) {
+          return false;
+        }
+      }).create();
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-  private static final Type SUBJECT_LIST_TYPE = new TypeToken<List<SubjectRepresentation>>() {
-  }.getType();
-  private static final Type SCHEMA_ENTRY_LIST_TYPE = new TypeToken<List<SchemaEntry>>() {
-  }.getType();
+  private static final Type SUBJECT_LIST_TYPE = new TypeToken<List<SubjectRepresentation>>() {}.getType();
+  private static final Type SCHEMA_ENTRY_LIST_TYPE = new TypeToken<List<SchemaEntry>>() {}.getType();
 
   @Override
   public String subjectsToJson(Iterable<Subject> subjects) {

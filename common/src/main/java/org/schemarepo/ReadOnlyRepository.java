@@ -19,6 +19,7 @@ public class ReadOnlyRepository extends DelegatingRepository {
 
   /**
    * Create a repository that disallows mutations to the underlying repository.
+   * 
    * @param repo The repository to wrap
    */
   @Inject

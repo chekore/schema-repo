@@ -26,8 +26,8 @@ public class ValidatorFactory {
   }
 
   /**
-   * @param validatorNames
-   *          The set of {@link Validator} names to resolve. Must not be null.
+   * @param validatorNames The set of {@link Validator} names to resolve. Must not
+   *                       be null.
    * @return A list of {@link Validator}s. Not null.
    */
   public final List<Validator> getValidators(Set<String> validatorNames) {
@@ -63,7 +63,7 @@ public class ValidatorFactory {
     public Builder setValidator(String name, Validator validator) {
       if (name.startsWith("repo.")) {
         throw new RuntimeException(
-          "Validator names starting with 'repo.'" + " are reserved.  Attempted to set validator with name: " + name);
+            "Validator names starting with 'repo.'" + " are reserved.  Attempted to set validator with name: " + name);
       }
       validators.put(name, validator);
       return this;
@@ -83,7 +83,7 @@ public class ValidatorFactory {
 
     public ValidatorFactory build() {
       return new ValidatorFactory(new HashMap<String, Validator>(validators),
-        new HashSet<String>(defaultSubjectValidators));
+          new HashSet<String>(defaultSubjectValidators));
     }
 
     {
@@ -95,7 +95,7 @@ public class ValidatorFactory {
   private static class Reject implements Validator {
     @Override
     public void validate(String schemaToValidate, Iterable<SchemaEntry> schemasInOrder)
-      throws SchemaValidationException {
+        throws SchemaValidationException {
       throw new SchemaValidationException("repo.validator.reject validator always rejects validation");
     }
   }

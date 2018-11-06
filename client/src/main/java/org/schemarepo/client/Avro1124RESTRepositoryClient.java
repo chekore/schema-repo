@@ -6,12 +6,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 
-import org.schemarepo.BaseRepository;
-import org.schemarepo.RepositoryUtil;
-import org.schemarepo.SchemaEntry;
-import org.schemarepo.SchemaValidationException;
-import org.schemarepo.Subject;
-import org.schemarepo.SubjectConfig;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.MediaType;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
@@ -20,14 +17,17 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.representation.Form;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.MediaType;
+import org.schemarepo.BaseRepository;
+import org.schemarepo.RepositoryUtil;
+import org.schemarepo.SchemaEntry;
+import org.schemarepo.SchemaValidationException;
+import org.schemarepo.Subject;
+import org.schemarepo.SubjectConfig;
 
 
 /**
- * An Implementation of {@link org.schemarepo.Repository} that connects to a remote
- * RESTRepository over HTTP.<br/>
+ * An Implementation of {@link org.schemarepo.Repository} that connects to a
+ * remote RESTRepository over HTTP.<br/>
  * <br/>
  * Typically, this is used in a client wrapped in a
  * {@link org.schemarepo.CacheRepository} to limit network communication.<br/>
@@ -35,7 +35,8 @@ import javax.ws.rs.core.MediaType;
  * Alternatively, this implementation can itself be what is used behind a
  * RESTRepository in a RepositoryServer, thus creating a caching proxy.
  *
- * <b>Note:</b> This is the original implementation from <a href='https://issues.apache.org/jira/browse/AVRO-1124'>AVRO-1124 issue</a>
+ * <b>Note:</b> This is the original implementation from
+ * <a href='https://issues.apache.org/jira/browse/AVRO-1124'>AVRO-1124 issue</a>
  *
  * @see org.schemarepo.client.RESTRepositoryClient
  */
@@ -56,7 +57,7 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
     }
 
     String regSubjectName =
-      webResource.path(subject).type(MediaType.APPLICATION_FORM_URLENCODED).put(String.class, form);
+        webResource.path(subject).type(MediaType.APPLICATION_FORM_URLENCODED).put(String.class, form);
 
     return new RESTSubject(regSubjectName);
   }
@@ -64,7 +65,7 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
   @Override
   public Subject lookup(String subject) {
     RepositoryUtil.validateSchemaOrSubject(subject);
-    try {//returns ok or exception if not found
+    try {// returns ok or exception if not found
       webResource.path(subject).get(String.class);
       return new RESTSubject(subject);
     } catch (Exception e) {
@@ -81,7 +82,7 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
         subjectList.add(new RESTSubject(subjName));
       }
     } catch (Exception e) {
-      //no op. return empty list anyways
+      // no op. return empty list anyways
     }
     return subjectList;
   }
@@ -111,8 +112,7 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
     }
 
     @Override
-    public SchemaEntry register(String schema)
-      throws SchemaValidationException {
+    public SchemaEntry register(String schema) throws SchemaValidationException {
       RepositoryUtil.validateSchemaOrSubject(schema);
 
       String path = getName() + "/register";
@@ -120,8 +120,7 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
     }
 
     @Override
-    public SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
-      throws SchemaValidationException {
+    public SchemaEntry registerIfLatest(String schema, SchemaEntry latest) throws SchemaValidationException {
       RepositoryUtil.validateSchemaOrSubject(schema);
       String idStr = (latest == null) ? "" : latest.getId();
 
@@ -129,8 +128,7 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
       return handleRegisterRequest(path, schema);
     }
 
-    private SchemaEntry handleRegisterRequest(String path, String schema)
-      throws SchemaValidationException {
+    private SchemaEntry handleRegisterRequest(String path, String schema) throws SchemaValidationException {
       String schemaId;
       try {
         schemaId = webResource.path(path).type(MediaType.TEXT_PLAIN_TYPE).put(String.class, schema);
@@ -140,7 +138,7 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
         if (ClientResponse.Status.fromStatusCode(cr.getStatus()).equals(ClientResponse.Status.FORBIDDEN)) {
           throw new SchemaValidationException("Invalid schema: " + schema + ". Reason: " + cr.getEntity(String.class));
         } else {
-          //any other status should return null
+          // any other status should return null
           return null;
         }
       } catch (ClientHandlerException e) {

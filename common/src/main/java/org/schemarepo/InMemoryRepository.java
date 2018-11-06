@@ -45,8 +45,7 @@ public class InMemoryRepository extends AbstractBackendRepository {
     }
 
     @Override
-    public synchronized SchemaEntry register(String schema)
-      throws SchemaValidationException {
+    public synchronized SchemaEntry register(String schema) throws SchemaValidationException {
       String id = String.valueOf(nextId);
       SchemaEntry toRegister = new SchemaEntry(id, schema);
       SchemaEntry valueInCache = schemas.add(toRegister);
@@ -60,7 +59,7 @@ public class InMemoryRepository extends AbstractBackendRepository {
 
     @Override
     public synchronized SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
-      throws SchemaValidationException {
+        throws SchemaValidationException {
       if (latest == this.latest || (latest != null && latest.equals(this.latest))) {
         return register(schema);
       } else {

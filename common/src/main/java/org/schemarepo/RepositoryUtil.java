@@ -11,12 +11,12 @@ import java.util.Properties;
 
 
 /**
- * {@link RepositoryUtil} contains static helper methods for the
- * org.schemarepo package.
+ * {@link RepositoryUtil} contains static helper methods for the org.schemarepo
+ * package.
  * <p>
  * {@link #subjectsToString(Iterable)} and
- * {@link #subjectNamesFromString(String)} can be used to encode
- * subjects to string format. <br/>
+ * {@link #subjectNamesFromString(String)} can be used to encode subjects to
+ * string format. <br/>
  * {@link #schemasToString(Iterable)} and {@link #schemasFromString(String)} can
  * be used to encode schemas to string format.
  * </p>
@@ -29,15 +29,13 @@ import java.util.Properties;
  * </p>
  */
 public final class RepositoryUtil {
-  private RepositoryUtil() {
-  }
+  private RepositoryUtil() {}
 
   /**
    * Encode {@link Subject}s into a {@link String} for use by
    * {@link #subjectNamesFromString(String)}
    *
-   * @param subjects
-   *          the Subject objects to encode
+   * @param subjects the Subject objects to encode
    * @return The {@link Subject} objects encoded as a String
    */
   public static String subjectsToString(Iterable<Subject> subjects) {
@@ -51,8 +49,7 @@ public final class RepositoryUtil {
   /**
    * Decode a string created by {@link #subjectsToString(Iterable)}
    *
-   * @param str
-   *          The String to decode
+   * @param str The String to decode
    * @return an {@link java.lang.Iterable} of {@link Subject}
    */
   public static Iterable<String> subjectNamesFromString(String str) {
@@ -70,8 +67,7 @@ public final class RepositoryUtil {
    * Encode {@link SchemaEntry} objects into a {@link String} for use by
    * {@link #schemasFromString(String)}
    *
-   * @param allEntries
-   *          the SchemaEntry objects to encode
+   * @param allEntries the SchemaEntry objects to encode
    * @return The {@link SchemaEntry} objects encoded as a String
    */
   public static String schemasToString(Iterable<SchemaEntry> allEntries) {
@@ -93,8 +89,7 @@ public final class RepositoryUtil {
   /**
    * Decode a string created by {@link #schemasToString(Iterable)}
    *
-   * @param str
-   *          The String to decode
+   * @param str The String to decode
    * @return An {@link java.lang.Iterable} of {@link SchemaEntry}
    */
   public static Iterable<SchemaEntry> schemasFromString(String str) {
@@ -129,7 +124,10 @@ public final class RepositoryUtil {
     return new SubjectConfig.Builder().set(propData).build();
   }
 
-  /** temporary until we have decided how to deal with null configs or create a SubjectConfig class **/
+  /**
+   * temporary until we have decided how to deal with null configs or create a
+   * SubjectConfig class
+   **/
   public static SubjectConfig safeConfig(SubjectConfig config) {
     if (null == config) {
       return SubjectConfig.emptyConfig();
@@ -140,12 +138,11 @@ public final class RepositoryUtil {
 
   /**
    * Helper method for splitting a string by a delimiter with
-   * java.util.String.split().
-   * Omits empty values.
-   * @param toSplit The string to split.  If null, an empty
-   *   String[] is returned
-   * @return A String[] containing the non-empty values resulting
-   *   from the split.  Does not return null.
+   * java.util.String.split(). Omits empty values.
+   * 
+   * @param toSplit The string to split. If null, an empty String[] is returned
+   * @return A String[] containing the non-empty values resulting from the split.
+   *         Does not return null.
    */
   public static List<String> commaSplit(String toSplit) {
     if (toSplit == null) {
@@ -176,6 +173,7 @@ public final class RepositoryUtil {
 
   /**
    * Converts properties to string representation
+   * 
    * @param props
    * @param comment optional comment (can be null)
    * @return String (standard key=value format)

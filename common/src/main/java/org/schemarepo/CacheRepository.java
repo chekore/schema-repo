@@ -15,12 +15,12 @@ import javax.inject.Inject;
  * CacheRepository can cache Subjects (which cannot be deleted) and returns an
  * implementation of {@link Subject} that caches schema to id mappings.
  *
- * CacheRepository can only cache the immutable elements of a Repository, because
- * it is intended for use in any context -- in a client, in a proxy, or above a raw
- * implementation of a repository.
- * It cannot cache the entire list of subjects since the list is mutable.
- * Similarly, a cached subject cannot cache the list of schemas, the subject configuration,
- * or the latest() schema because those are mutable.
+ * CacheRepository can only cache the immutable elements of a Repository,
+ * because it is intended for use in any context -- in a client, in a proxy, or
+ * above a raw implementation of a repository. It cannot cache the entire list
+ * of subjects since the list is mutable. Similarly, a cached subject cannot
+ * cache the list of schemas, the subject configuration, or the latest() schema
+ * because those are mutable.
  *
  */
 public class CacheRepository extends DelegatingRepository {
@@ -30,7 +30,8 @@ public class CacheRepository extends DelegatingRepository {
   /**
    * Create a caching repository that wraps the provided repository using the
    * cache provided
-   * @param repo The repository to wrap
+   * 
+   * @param repo  The repository to wrap
    * @param cache The cache to use
    */
   @Inject

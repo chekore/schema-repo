@@ -24,12 +24,12 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Scanner;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.schemarepo.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 
 /**
@@ -38,16 +38,17 @@ import javax.inject.Named;
  * The {@link Repository} stores all of its data in a single base directory.
  * Within this directory each {@link Subject} is represented by a nested
  * directory with the same name as the {@link Subject}. Within each
- * {@link Subject} directory there are three file types: <li>
- * A properties file named 'subject.properties' containing the configured
+ * {@link Subject} directory there are three file types:
+ * <li>A properties file named 'subject.properties' containing the configured
  * properties for the Subject. At this time, the only used property is
- * "schema-repo.validator.class".</li> <li>
- * A text file named 'schema_ids' containing the schema ids, in order of their
- * creation, delimited by newline, encoded in UTF-8. This is used to track the
- * order of schema registration for {@link Subject#latest()} and
- * {@link Subject#allEntries()}</li> <li>
- * One file per schema the contents of which are the schema encoded in UTF-8 and
- * the name of which is the schema id followed by the postfix '.schema'.</li>
+ * "schema-repo.validator.class".</li>
+ * <li>A text file named 'schema_ids' containing the schema ids, in order of
+ * their creation, delimited by newline, encoded in UTF-8. This is used to track
+ * the order of schema registration for {@link Subject#latest()} and
+ * {@link Subject#allEntries()}</li>
+ * <li>One file per schema the contents of which are the schema encoded in UTF-8
+ * and the name of which is the schema id followed by the postfix
+ * '.schema'.</li>
  *
  */
 public class LocalFileSystemRepository extends AbstractBackendRepository {
@@ -62,8 +63,8 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
   private final FileLock fileLock;
 
   /**
-   * Create a LocalFileSystemRepository in the directory path provided. Locks a file
-   * "repository.lock" to ensure no other object or process is running a
+   * Create a LocalFileSystemRepository in the directory path provided. Locks a
+   * file "repository.lock" to ensure no other object or process is running a
    * LocalFileSystemRepository from the same place. The lock is released if
    * {@link #close()} is called, the object is finalized, or the JVM exits.
    *
@@ -77,14 +78,14 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
     this.rootDir = new File(repoPath);
     if ((!rootDir.exists() && !rootDir.mkdirs()) || !rootDir.isDirectory()) {
       throw new java.lang.RuntimeException(
-        "Unable to create repo directory, or not a directory: " + rootDir.getAbsolutePath());
+          "Unable to create repo directory, or not a directory: " + rootDir.getAbsolutePath());
     }
     // lock repository
     try {
       File lockfile = new File(rootDir, LOCKFILE);
       lockfile.createNewFile();
       @SuppressWarnings("resource") // raf is closed when lockChannel is closed
-        RandomAccessFile raf = new RandomAccessFile(lockfile, "rw");
+      RandomAccessFile raf = new RandomAccessFile(lockfile, "rw");
       lockChannel = raf.getChannel();
       fileLock = lockChannel.tryLock();
       if (fileLock != null) {
@@ -134,8 +135,7 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
   private static void writePropertyFile(File file, final Properties prop) {
     writeToFile(file, new WriteOp() {
       @Override
-      protected void write(Writer writer)
-        throws IOException {
+      protected void write(Writer writer) throws IOException {
         prop.store(writer, "Schema Repository Subject Properties");
       }
     }, false);
@@ -144,8 +144,7 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
   private static void appendLineToFile(File file, final String line) {
     writeToFile(file, new WriteOp() {
       @Override
-      protected void write(Writer writer)
-        throws IOException {
+      protected void write(Writer writer) throws IOException {
         writer.append(line).append('\n');
       }
     }, true);
@@ -185,14 +184,16 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
     try {
       fileLock.release();
     } catch (IOException e) {
-      // nothing to do here -- it was already released or there are underlying errors we cannot recover from
+      // nothing to do here -- it was already released or there are underlying errors
+      // we cannot recover from
       logger.debug("Failed to release the lock {}", fileLock, e);
     } finally {
       closed = true;
       try {
         lockChannel.close();
       } catch (IOException e) {
-        // nothing to do here -- underlying errors but recovery not possible here or in client, and already closed
+        // nothing to do here -- underlying errors but recovery not possible here or in
+        // client, and already closed
         logger.debug("Failed to close lockChannel {}", lockChannel, e);
       }
     }
@@ -213,7 +214,7 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
     final File subjectDir = new File(rootDir, subjectName);
     if (subjectDir.exists()) {
       throw new RuntimeException(
-        "Cannot create a FileSubject, directory already exists: " + subjectDir.getAbsolutePath());
+          "Cannot create a FileSubject, directory already exists: " + subjectDir.getAbsolutePath());
     }
     if (!subjectDir.mkdir()) {
       throw new RuntimeException("Cannot create a FileSubject dir: " + subjectDir.getAbsolutePath());
@@ -235,8 +236,7 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
   }
 
   private abstract static class WriteOp {
-    protected abstract void write(Writer writer)
-      throws IOException;
+    protected abstract void write(Writer writer) throws IOException;
   }
 
   private class FileSubject extends Subject {
@@ -280,7 +280,7 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
         }
         if (schemaFileNames.size() > 0) {
           throw new RuntimeException("Schema files found in subject directory " + subjectDir.getAbsolutePath()
-            + " that are not referenced in the " + SCHEMA_IDS + " file: " + schemaFileNames.toString());
+              + " that are not referenced in the " + SCHEMA_IDS + " file: " + schemaFileNames.toString());
         }
         if (lastId != null) {
           latest = new SchemaEntry(lastId.toString(), readSchemaForId(lastId.toString()));
@@ -296,8 +296,7 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
     }
 
     @Override
-    public synchronized SchemaEntry register(String schema)
-      throws SchemaValidationException {
+    public synchronized SchemaEntry register(String schema) throws SchemaValidationException {
       isValid();
       RepositoryUtil.validateSchemaOrSubject(schema);
       SchemaEntry entry = lookupBySchema(schema);
@@ -328,7 +327,7 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
           return latest;
         } else {
           throw new RuntimeException(
-            "Unable to register schema, schema file either exists already " + " or couldn't create new file");
+              "Unable to register schema, schema file either exists already " + " or couldn't create new file");
         }
       } catch (NumberFormatException e) {
         throw new RuntimeException("Unable to register schema, invalid schema latest schema id ", e);
@@ -339,10 +338,10 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
 
     @Override
     public synchronized SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
-      throws SchemaValidationException {
+        throws SchemaValidationException {
       isValid();
       if (latest == this.latest // both null
-        || (latest != null && latest.equals(this.latest))) {
+          || (latest != null && latest.equals(this.latest))) {
         return register(schema);
       } else {
         return null;
@@ -418,8 +417,7 @@ public class LocalFileSystemRepository extends AbstractBackendRepository {
       }
     }
 
-    private String readAllAsString(File file)
-      throws FileNotFoundException {
+    private String readAllAsString(File file) throws FileNotFoundException {
       // a scanner that will read a whole file
       Scanner s = new Scanner(file, "UTF-8").useDelimiter("\\A");
       try {

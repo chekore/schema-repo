@@ -30,10 +30,11 @@ public interface JsonUtil {
   Iterable<String> subjectNamesFromJson(String str);
 
   /**
-   * Encode {@link org.schemarepo.SchemaEntry} objects into a {@link String} for use by
-   * {@link #schemasFromJson(String)}
+   * Encode {@link org.schemarepo.SchemaEntry} objects into a {@link String} for
+   * use by {@link #schemasFromJson(String)}
    *
-   * The format is an array of objects containing id and schema fields, for example:
+   * The format is an array of objects containing id and schema fields, for
+   * example:
    *
    * [{"id": "0", "schema": "schema1"}, {"id": "2", "schema": "schema2"}]
    *

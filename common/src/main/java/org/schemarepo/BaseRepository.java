@@ -19,7 +19,9 @@ public abstract class BaseRepository implements Repository {
 
   /**
    * Asserts the repository is in a valid state (for ex. not closed).
-   * @throws java.lang.IllegalStateException if the repository is NOT in a valid state
+   * 
+   * @throws java.lang.IllegalStateException if the repository is NOT in a valid
+   *         state
    */
   public void isValid() {
     if (closed) {
@@ -28,16 +30,19 @@ public abstract class BaseRepository implements Repository {
   }
 
   @Override
-  public void close()
-    throws IOException {
+  public void close() throws IOException {
     logger.info("Closing {}", this);
   }
 
   /**
-   * Expose certain configuration elements as properties.
-   * This can be used to construct a useful toString() response, for ex.
-   * <p>Remember to call <pre>super</pre> when overriding!</p>
-   * @return Map representing properties; note that the actual implementation may be immutable
+   * Expose certain configuration elements as properties. This can be used to
+   * construct a useful toString() response, for ex.
+   * <p>
+   * Remember to call <b>super</b> when overriding!
+   * </p>
+   * 
+   * @return Map representing properties; note that the actual implementation may
+   *         be immutable
    */
   protected Map<String, String> exposeConfiguration() {
     return Collections.emptyMap();

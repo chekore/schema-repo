@@ -42,8 +42,7 @@ public abstract class DelegatingRepository extends BaseRepository {
   }
 
   @Override
-  public void close()
-    throws IOException {
+  public void close() throws IOException {
     repo.close();
   }
 

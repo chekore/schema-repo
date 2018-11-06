@@ -4,16 +4,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
+
 import org.schemarepo.Repository;
 import org.schemarepo.SchemaEntry;
 import org.schemarepo.SchemaValidationException;
 import org.schemarepo.Subject;
 import org.schemarepo.SubjectConfig;
 import org.schemarepo.api.converter.Converter;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Lists;
 
 
 /**
@@ -23,8 +23,8 @@ import com.google.common.collect.Lists;
  * N.B.: Currently, there is no cache eviction mechanism, so this can
  * potentially grow to unbounded sizes.
  *
- * N.B.2: registerIfLatest() is not supported in the TypedSchemaRepository,
- * at least for now...
+ * N.B.2: registerIfLatest() is not supported in the TypedSchemaRepository, at
+ * least for now...
  */
 public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
 
@@ -41,7 +41,7 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
   // Constructors
 
   public TypedSchemaRepository(Repository repo, Converter<ID> idConverter, Converter<SCHEMA> schemaConverter,
-    Converter<SUBJECT> subjectConverter, SubjectConfig.Builder defaultSubjectConfigBuilder) {
+      Converter<SUBJECT> subjectConverter, SubjectConfig.Builder defaultSubjectConfigBuilder) {
     this.repo = repo;
     this.convertId = idConverter;
     this.convertSchema = schemaConverter;
@@ -51,7 +51,7 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
   }
 
   public TypedSchemaRepository(Repository repo, Converter<ID> idConverter, Converter<SCHEMA> schemaConverter,
-    Converter<SUBJECT> subjectConverter) {
+      Converter<SUBJECT> subjectConverter) {
     this(repo, idConverter, schemaConverter, subjectConverter, new SubjectConfig.Builder());
   }
 
@@ -97,7 +97,7 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
    * This retrieves immutable data, hence it is cache-able indefinitely.
    *
    * @param subjectName containing the sought schema
-   * @param id of the sought schema
+   * @param id          of the sought schema
    * @return the sought schema, or null if the subject does not exist or if it
    *         does not have any registered schemas yet.
    */
@@ -106,9 +106,9 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
 
     /**
      * Implementation detail: We first peek directly in the cache without going
-     * through {@link #getIdToSchemaCache(Object)} because we don't want to
-     * bloat the cache with an empty map if the subject or ID does not exist
-     * in the remote repository.
+     * through {@link #getIdToSchemaCache(Object)} because we don't want to bloat
+     * the cache with an empty map if the subject or ID does not exist in the remote
+     * repository.
      */
     Map<ID, SCHEMA> idToSchemaCache = subjectToIdToSchemaCache.get(subjectName);
     if (idToSchemaCache != null) {
@@ -149,9 +149,9 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
         Map<ID, SCHEMA> idToSchemaCache = getIdToSchemaCache(subjectName);
         ID id = convertId.fromString(schemaEntry.getId());
         /**
-         * Implementation detail: First, we check if the latest ID is already in
-         * cache, to avoid the cost of converting the String literal schema to
-         * its strong type if we already have it in-memory.
+         * Implementation detail: First, we check if the latest ID is already in cache,
+         * to avoid the cost of converting the String literal schema to its strong type
+         * if we already have it in-memory.
          */
         schema = idToSchemaCache.get(id);
         if (schema == null) {
@@ -170,18 +170,18 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
    * This retrieves immutable data, hence it is cache-able indefinitely.
    *
    * @param subjectName containing the sought ID
-   * @param schema corresponding to the sought ID
-   * @return the sought ID, or null if the subject does not exist or if it
-   *         does not have any registered schemas yet.
+   * @param schema      corresponding to the sought ID
+   * @return the sought ID, or null if the subject does not exist or if it does
+   *         not have any registered schemas yet.
    */
   public ID getSchemaId(SUBJECT subjectName, SCHEMA schema) {
     ID id = null;
 
     /**
      * Implementation detail: We first peek directly in the cache without going
-     * through {@link #getSchemaToIdCache(Object)} because we don't want to
-     * bloat the cache with an empty map if the subject or schema does not exist
-     * in the remote repository.
+     * through {@link #getSchemaToIdCache(Object)} because we don't want to bloat
+     * the cache with an empty map if the subject or schema does not exist in the
+     * remote repository.
      */
     BiMap<ID, SCHEMA> idToSchemaCache = subjectToIdToSchemaCache.get(subjectName);
     if (idToSchemaCache != null) {
@@ -203,26 +203,25 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
   }
 
   /**
-   * Registers a new schema in the given subject and returns its ID. If the
-   * schema already existed, its previous ID will be returned instead.
+   * Registers a new schema in the given subject and returns its ID. If the schema
+   * already existed, its previous ID will be returned instead.
    *
-   * This will only result in a call to the underlying schema repo
-   * implementation if the schema is not already known in the local cache.
+   * This will only result in a call to the underlying schema repo implementation
+   * if the schema is not already known in the local cache.
    *
-   * N.B.: If the subject does not exist yet, it will be initialized with a
-   * config built from the defaultSubjectConfigBuilder provided to the
+   * N.B.: If the subject does not exist yet, it will be initialized with a config
+   * built from the defaultSubjectConfigBuilder provided to the
    * {@link TypedSchemaRepository} at construction time. If you wish to use a
    * non-default configuration, you should first invoke
-   * {@link #setConfig(Object, org.schemarepo.SubjectConfig)} before invoking
-   * this function.
+   * {@link #setConfig(Object, org.schemarepo.SubjectConfig)} before invoking this
+   * function.
    *
    * @param subjectName to register the schema into
-   * @param schema to register
+   * @param schema      to register
    * @return the ID of the registered schema
    * @throws SchemaValidationException
    */
-  public ID registerSchema(SUBJECT subjectName, SCHEMA schema)
-    throws SchemaValidationException {
+  public ID registerSchema(SUBJECT subjectName, SCHEMA schema) throws SchemaValidationException {
     Map<SCHEMA, ID> schemaToIdCache = getSchemaToIdCache(subjectName);
     ID id = schemaToIdCache.get(schema);
 
@@ -233,12 +232,12 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
       }
       /**
        * Implementation detail: The repo is expected to act as a synchronized,
-       * consistent authority. Therefore, even if there is a race condition
-       * where two calls to {@link #registerSchema(Object, Object)} happen
-       * simultaneously (whether with identical or with different schemas),
-       * the repo should correctly register each schema once with a unique ID.
-       * Therefore, the schemaToIdCache.put operation can be considered
-       * idempotent because it is immutable data which is going into the cache.
+       * consistent authority. Therefore, even if there is a race condition where two
+       * calls to {@link #registerSchema(Object, Object)} happen simultaneously
+       * (whether with identical or with different schemas), the repo should correctly
+       * register each schema once with a unique ID. Therefore, the
+       * schemaToIdCache.put operation can be considered idempotent because it is
+       * immutable data which is going into the cache.
        */
       SchemaEntry schemaEntry = subject.register(convertSchema.toString(schema));
       id = convertId.fromString(schemaEntry.getId());
@@ -268,10 +267,10 @@ public class TypedSchemaRepository<ID, SCHEMA, SUBJECT> {
    * This sets mutable data, hence it will always result in a call to the
    * underlying schema repo implementation.
    *
-   * If the subject does not exist, it will be initialized with the given
-   * config, but will not contain any ID/schema pair.
+   * If the subject does not exist, it will be initialized with the given config,
+   * but will not contain any ID/schema pair.
    *
-   * @param subjectName to change the config for
+   * @param subjectName   to change the config for
    * @param subjectConfig to set for the given subject
    */
   public void setConfig(SUBJECT subjectName, SubjectConfig subjectConfig) {

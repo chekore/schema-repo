@@ -10,8 +10,7 @@ import java.util.Set;
 
 /**
  * A {@link SubjectConfig} is effectively a Map<String, String> , with reserved
- * keys and default values for certain keys.
- * <br/>
+ * keys and default values for certain keys. <br/>
  * Keys starting with "repo." are reserved.
  *
  */
@@ -83,9 +82,8 @@ public class SubjectConfig {
         if (VALIDATORS_KEY.equals(key)) {
           setValidators(RepositoryUtil.commaSplit(value));
         } else {
-          throw new RuntimeException(
-            "SubjectConfig keys starting with '" + RESERVED_PREFIX + "' are reserved, failed to set: " + key
-              + " to value: " + value);
+          throw new RuntimeException("SubjectConfig keys starting with '" + RESERVED_PREFIX
+              + "' are reserved, failed to set: " + key + " to value: " + value);
         }
       } else {
         conf.put(key, value);
@@ -99,7 +97,8 @@ public class SubjectConfig {
       if (!validatorNames.isEmpty()) {
         this.validators.addAll(validatorNames);
       }
-      // put the config entry even if they specified an empty list of validators. This is explicitly "no validators"
+      // put the config entry even if they specified an empty list of validators. This
+      // is explicitly "no validators"
       this.conf.put(VALIDATORS_KEY, RepositoryUtil.commaJoin(validators));
       return this;
     }
@@ -112,7 +111,7 @@ public class SubjectConfig {
 
     public SubjectConfig build() {
       return new SubjectConfig(Collections.unmodifiableMap(new HashMap<String, String>(conf)),
-        Collections.unmodifiableSet(new HashSet<String>(validators)));
+          Collections.unmodifiableSet(new HashSet<String>(validators)));
     }
   }
 }

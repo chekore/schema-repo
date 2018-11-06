@@ -14,9 +14,11 @@ public abstract class AbstractBackendRepository extends BaseRepository {
   }
 
   /**
-   * Concrete subclasses must override to return specific implementation of {@link org.schemarepo.Subject}.
-   * Note that this instantiates the "right" subject only, any "side effects" (such as mutating persistent state)
-   * must be implemented in {@link #registerSubjectInBackend(String, SubjectConfig)}
+   * Concrete subclasses must override to return specific implementation of
+   * {@link org.schemarepo.Subject}. Note that this instantiates the "right"
+   * subject only, any "side effects" (such as mutating persistent state) must be
+   * implemented in {@link #registerSubjectInBackend(String, SubjectConfig)}
+   * 
    * @param subjectName subject name
    * @return Subject
    */
@@ -24,8 +26,10 @@ public abstract class AbstractBackendRepository extends BaseRepository {
 
   /**
    * Creates, applies validation decorator, and caches subject.
+   * 
    * @param subjectName subject name
-   * @return Subject the newly created instance or possibly pre-existing cached instance
+   * @return Subject the newly created instance or possibly pre-existing cached
+   *         instance
    */
   protected final Subject getAndCacheSubject(final String subjectName) {
     return cacheSubject(getSubjectInstance(subjectName));
@@ -33,6 +37,7 @@ public abstract class AbstractBackendRepository extends BaseRepository {
 
   /**
    * Applies validation decorator, and caches subject.
+   * 
    * @param subject subject to cache
    * @return Subject the passed instance or possibly pre-existing cached instance
    */
@@ -54,10 +59,11 @@ public abstract class AbstractBackendRepository extends BaseRepository {
   }
 
   /**
-   * Backend-specific registration logic. This is called during registration upon cache miss.
-   * Responsible for the persistent "side effects".
+   * Backend-specific registration logic. This is called during registration upon
+   * cache miss. Responsible for the persistent "side effects".
+   * 
    * @param subjectName subject name
-   * @param config subject config
+   * @param config      subject config
    */
   protected abstract void registerSubjectInBackend(final String subjectName, final SubjectConfig config);
 
@@ -74,8 +80,10 @@ public abstract class AbstractBackendRepository extends BaseRepository {
   }
 
   /**
-   * Backend-specific check if the subject actually exists. This is called during lookup upon cache miss.
-   * Usually is overridden by subclasses. By default, assume that a subject does <b>not</b> exist if it's not in cache.
+   * Backend-specific check if the subject actually exists. This is called during
+   * lookup upon cache miss. Usually is overridden by subclasses. By default,
+   * assume that a subject does <b>not</b> exist if it's not in cache.
+   * 
    * @param subjectName subject name
    * @return boolean
    */
