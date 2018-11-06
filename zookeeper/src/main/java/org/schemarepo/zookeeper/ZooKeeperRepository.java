@@ -14,6 +14,9 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -30,19 +33,19 @@ import org.schemarepo.SubjectConfig;
 import org.schemarepo.ValidatorFactory;
 import org.schemarepo.config.Config;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 
 /**
- * This {@link org.schemarepo.Repository} implementation stores its state using Zookeeper.
+ * This {@link org.schemarepo.Repository} implementation stores its state using
+ * Zookeeper.
  * <p/>
- * It requires the schema-repo.zookeeper.ensemble configuration property. This is
- * a comma-separated list of host:port addresses. Each address can also be suffixed
- * by a namespace, i.e.: zk.1:2181/schemas,zk.2:2181/schemas,zk.3:2181/schemas
+ * It requires the schema-repo.zookeeper.ensemble configuration property. This
+ * is a comma-separated list of host:port addresses. Each address can also be
+ * suffixed by a namespace, i.e.:
+ * zk.1:2181/schemas,zk.2:2181/schemas,zk.3:2181/schemas
  * <p/>
- * This Repository is meant to be highly available, meaning that multiple instances
- * can share the same Zookeeper ensemble and synchronize their state through it.
+ * This Repository is meant to be highly available, meaning that multiple
+ * instances can share the same Zookeeper ensemble and synchronize their state
+ * through it.
  */
 public class ZooKeeperRepository extends AbstractBackendRepository {
 
@@ -62,10 +65,10 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
 
   @Inject
   public ZooKeeperRepository(@Named(Config.ZK_ENSEMBLE) String zkEnsemble,
-    @Named(Config.ZK_PATH_PREFIX) String zkPathPrefix, @Named(Config.ZK_SESSION_TIMEOUT) Integer zkSessionTimeout,
-    @Named(Config.ZK_CONNECTION_TIMEOUT) Integer zkConnectionTimeout,
-    @Named(Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES) Integer curatorSleepTimeBetweenRetries,
-    @Named(Config.ZK_CURATOR_NUMBER_OF_RETRIES) Integer curatorNumberOfRetries, ValidatorFactory validators) {
+      @Named(Config.ZK_PATH_PREFIX) String zkPathPrefix, @Named(Config.ZK_SESSION_TIMEOUT) Integer zkSessionTimeout,
+      @Named(Config.ZK_CONNECTION_TIMEOUT) Integer zkConnectionTimeout,
+      @Named(Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES) Integer curatorSleepTimeBetweenRetries,
+      @Named(Config.ZK_CURATOR_NUMBER_OF_RETRIES) Integer curatorNumberOfRetries, ValidatorFactory validators) {
     super(validators);
 
     if (zkEnsemble == null || zkEnsemble.isEmpty()) {
@@ -73,19 +76,19 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       System.exit(1);
     }
 
-    logger.info(
-      "Starting ZookeeperRepository with the following parameters:\n" + Config.ZK_ENSEMBLE + ": " + zkEnsemble + "\n"
-        + Config.ZK_PATH_PREFIX + ": " + zkPathPrefix + "\n" + Config.ZK_SESSION_TIMEOUT + ": " + zkSessionTimeout
-        + "\n" + Config.ZK_CONNECTION_TIMEOUT + ": " + zkConnectionTimeout + "\n"
+    logger.info("Starting ZookeeperRepository with the following parameters:\n" + Config.ZK_ENSEMBLE + ": " + zkEnsemble
+        + "\n" + Config.ZK_PATH_PREFIX + ": " + zkPathPrefix + "\n" + Config.ZK_SESSION_TIMEOUT + ": "
+        + zkSessionTimeout + "\n" + Config.ZK_CONNECTION_TIMEOUT + ": " + zkConnectionTimeout + "\n"
         + Config.ZK_CURATOR_SLEEP_TIME_BETWEEN_RETRIES + ": " + curatorSleepTimeBetweenRetries + "\n"
         + Config.ZK_CURATOR_NUMBER_OF_RETRIES + ": " + curatorNumberOfRetries);
 
     RetryPolicy retryPolicy = new RetryNTimes(curatorSleepTimeBetweenRetries, curatorNumberOfRetries);
     CuratorFrameworkFactory.Builder cffBuilder =
-      CuratorFrameworkFactory.builder().connectString(zkEnsemble).sessionTimeoutMs(zkSessionTimeout)
-        .connectionTimeoutMs(zkConnectionTimeout).retryPolicy(retryPolicy).defaultData(new byte[0]);
+        CuratorFrameworkFactory.builder().connectString(zkEnsemble).sessionTimeoutMs(zkSessionTimeout)
+            .connectionTimeoutMs(zkConnectionTimeout).retryPolicy(retryPolicy).defaultData(new byte[0]);
 
-    // This temporary CuratorFramework is not namespaced and is only used to ensure the zkPathPrefix is properly initialized
+    // This temporary CuratorFramework is not namespaced and is only used to ensure
+    // the zkPathPrefix is properly initialized
     CuratorFramework tempCuratorFramework = cffBuilder.build();
     tempCuratorFramework.start();
 
@@ -97,14 +100,15 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       logger.info("The ZK Path Prefix ({}) was found in ZK.", zkPathPrefix);
     } catch (IllegalArgumentException e) {
       logger.error("Got an IllegalArgumentException while attempting to create the ZK Path Prefix (" + zkPathPrefix
-        + "). Exiting.", e);
+          + "). Exiting.", e);
       System.exit(1);
     } catch (Exception e) {
       logger.error("There was an unrecoverable exception during the ZooKeeperRepository startup. Exiting.", e);
       System.exit(1);
     }
 
-    // Once we're certain the zkPathPrefix is present, we initialize the CuratorFramework
+    // Once we're certain the zkPathPrefix is present, we initialize the
+    // CuratorFramework
     // we'll use for the rest of the ZK Repository's runtime.
     String zkPathPrefixWithoutLeadingSlash = zkPathPrefix.substring(1);
     zkClient = cffBuilder.namespace(zkPathPrefixWithoutLeadingSlash).build();
@@ -212,27 +216,26 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
   }
 
   /**
-   * Closes this stream and releases any system resources associated
-   * with it. If the stream is already closed then invoking this
-   * method has no effect.
+   * Closes this stream and releases any system resources associated with it. If
+   * the stream is already closed then invoking this method has no effect.
    *
    * @throws java.io.IOException if an I/O error occurs
    */
   @Override
-  public void close()
-    throws IOException {
+  public void close() throws IOException {
     int waitTime = 100;
     while (true) {
       if (zkLock.isAcquiredInThisProcess()) {
         try {
           logger.info("ZooKeeperRepository's close() called while lock is acquired. " + "Waiting " + waitTime
-            + " ms before trying again.");
+              + " ms before trying again.");
           wait(waitTime);
         } catch (InterruptedException e) {
           logger.warn("Interrupted while waiting", e);
         }
       } else {
-        // TODO: Make sure the race condition between the if condition and the close is harmless...
+        // TODO: Make sure the race condition between the if condition and the close is
+        // harmless...
         zkClient.close();
         break;
       }
@@ -257,12 +260,12 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
   }
 
   private class ZooKeeperSubject extends Subject {
-    //private final SubjectConfig config;
+    // private final SubjectConfig config;
     private final String endOfLine = System.getProperty("line.separator");
 
     /**
-     * A {@link org.schemarepo.Subject} has a name. The name must not be null or empty, and
-     * cannot contain whitespace. If the name contains whitespace an
+     * A {@link org.schemarepo.Subject} has a name. The name must not be null or
+     * empty, and cannot contain whitespace. If the name contains whitespace an
      * {@link IllegalArgumentException} is thrown.
      */
     ZooKeeperSubject(String subjectName) {
@@ -278,17 +281,16 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
           if (!foundIds.add(id)) {
             throw new RuntimeException("Corrupt id file, id '" + id + "' duplicated in " + getSchemaIdsFilePath());
           }
-          //fileReadable(getSchemaFile(id));
+          // fileReadable(getSchemaFile(id));
           schemaFileNames.remove(getSchemaFileName(id));
         }
         if (schemaFileNames.size() > 0) {
-          throw new RuntimeException(
-            "Schema files found in subject directory " + getSubjectPath() + " that are not referenced in the "
-              + SCHEMA_IDS + " file: " + schemaFileNames.toString());
+          throw new RuntimeException("Schema files found in subject directory " + getSubjectPath()
+              + " that are not referenced in the " + SCHEMA_IDS + " file: " + schemaFileNames.toString());
         }
       } catch (IOException e) {
         throw new RuntimeException("An IOException occurred while reading the properties at: " + getConfigFilePath(),
-          e);
+            e);
       } catch (Exception e) {
         throw new RuntimeException("An exception occurred while accessing ZK!", e);
       }
@@ -429,11 +431,8 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
         byte[] newSchemaFile = schema.getBytes();
         byte[] newSchemaIdsFile = serializeSchemaIds(allSchemaIds).getBytes();
         // Create new schema and update schema IDs file in one ZK transaction
-        zkClient.inTransaction().
-          create().forPath(getSchemaFilePath(newId.toString()), newSchemaFile).
-          and().
-          setData().forPath(getSchemaIdsFilePath(), newSchemaIdsFile).
-          and().commit();
+        zkClient.inTransaction().create().forPath(getSchemaFilePath(newId.toString()), newSchemaFile).and().setData()
+            .forPath(getSchemaIdsFilePath(), newSchemaIdsFile).and().commit();
 
         // TODO: Keep new schema in a local cache
         return new SchemaEntry(String.valueOf(newId), schema);
@@ -453,11 +452,8 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
         List<Integer> allSchemaIds = getSchemaIds();
         allSchemaIds.remove(Integer.valueOf(schemaId));
         // Delete schema and update schema IDs file in one ZK transaction
-        zkClient.inTransaction().
-          delete().forPath(getSchemaFilePath(schemaId)).
-          and().
-          setData().forPath(getSchemaIdsFilePath(), serializeSchemaIds(allSchemaIds).getBytes()).
-          and().commit();
+        zkClient.inTransaction().delete().forPath(getSchemaFilePath(schemaId)).and().setData()
+            .forPath(getSchemaIdsFilePath(), serializeSchemaIds(allSchemaIds).getBytes()).and().commit();
         return true;
       } catch (Exception e) {
         throw new RuntimeException("An exception occurred while accessing ZK!", e);
@@ -484,9 +480,9 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
 
     /**
      * Indicates whether the keys generated by this subject can be expected to parse
-     * as an integer. This delegates all the way through to the backing store and
-     * is not configurable through the Repository/Subject API, since implementations
-     * of the backing store are what determines how keys are generated; the contract
+     * as an integer. This delegates all the way through to the backing store and is
+     * not configurable through the Repository/Subject API, since implementations of
+     * the backing store are what determines how keys are generated; the contract
      * otherwise is merely that they are Strings and unique per subject.
      *
      * @return a boolean indicating if the IDs for this Subject are integers
@@ -505,8 +501,8 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
      * If the provided schema has not been registered in this subject, register it
      * and return its id.
      * <p/>
-     * Idempotent -- If two users simultaneously register the same schema, they
-     * will both get the same {@link org.schemarepo.SchemaEntry} result and succeed.
+     * Idempotent -- If two users simultaneously register the same schema, they will
+     * both get the same {@link org.schemarepo.SchemaEntry} result and succeed.
      *
      * @param schema The schema to register
      * @return The id of the schema
@@ -547,16 +543,14 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
      * provided latest entry.
      *
      * @param schema The schema to register
-     * @param latest the entry that must match the current actual latest value in order
-     *               to register this schema.
+     * @param latest the entry that must match the current actual latest value in
+     *               order to register this schema.
      * @return The id of the schema, or null if latest does not match.
-     * @throws org.schemarepo.SchemaValidationException
-     *          If the schema change is not valid according the validation rules
-     *          of the subject
+     * @throws org.schemarepo.SchemaValidationException If the schema change is not
+     *         valid according the validation rules of the subject
      */
     @Override
-    public SchemaEntry registerIfLatest(String schema, SchemaEntry latest)
-      throws SchemaValidationException {
+    public SchemaEntry registerIfLatest(String schema, SchemaEntry latest) throws SchemaValidationException {
       SchemaEntry latestInZk = latest();
       // both null
       if (latest == latestInZk || (latest != null && latest.equals(latestInZk))) {
@@ -567,12 +561,11 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
     }
 
     /**
-     * Lookup the {@link org.schemarepo.SchemaEntry} for the given schema. Since the mapping of
-     * schema to id is immutable, this result can be cached.
+     * Lookup the {@link org.schemarepo.SchemaEntry} for the given schema. Since the
+     * mapping of schema to id is immutable, this result can be cached.
      *
      * @param schema The schema to look up
-     * @return The SchemaEntry of the schema or null if the schema is not
-     *         registered
+     * @return The SchemaEntry of the schema or null if the schema is not registered
      */
     @Override
     public SchemaEntry lookupBySchema(String schema) {
@@ -588,12 +581,12 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
     }
 
     /**
-     * Lookup the {@link org.schemarepo.SchemaEntry} for the given subject by id. Since the
-     * mapping of schema to id is immutable the result can be cached.
+     * Lookup the {@link org.schemarepo.SchemaEntry} for the given subject by id.
+     * Since the mapping of schema to id is immutable the result can be cached.
      *
      * @param id the id of the schema to look up
-     * @return The SchemaEntry of the schema or null if no such schema is
-     *         registered for the provided id
+     * @return The SchemaEntry of the schema or null if no such schema is registered
+     *         for the provided id
      */
     @Override
     public SchemaEntry lookupById(String id) {
@@ -611,11 +604,11 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
     }
 
     /**
-     * Lookup the most recently registered schema for the given subject. This
-     * result is not cacheable, since the latest schema may change.
+     * Lookup the most recently registered schema for the given subject. This result
+     * is not cacheable, since the latest schema may change.
      *
-     * @return The {@link org.schemarepo.SchemaEntry} or null if no schema is registered with
-     *         this subject
+     * @return The {@link org.schemarepo.SchemaEntry} or null if no schema is
+     *         registered with this subject
      */
     @Override
     public SchemaEntry latest() {
@@ -638,17 +631,18 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
     }
 
     /**
-     * List the ids of schemas registered with the given subject, ordered from
-     * most recent to oldest. This result is not cacheable, since the
+     * List the ids of schemas registered with the given subject, ordered from most
+     * recent to oldest. This result is not cacheable, since the
      * {@link org.schemarepo.SchemaEntry} in the subject may grow over time.
      *
-     * @return the {@link org.schemarepo.SchemaEntry} objects in this subject, ordered from most
-     *         recent to oldest.
+     * @return the {@link org.schemarepo.SchemaEntry} objects in this subject,
+     *         ordered from most recent to oldest.
      */
     @Override
     public Iterable<SchemaEntry> allEntries() {
       // TODO: Get known schemas from local cache.
-      // TODO: Only touch ZK for list of schema IDs and unknown schemas within that list
+      // TODO: Only touch ZK for list of schema IDs and unknown schemas within that
+      // list
       List<SchemaEntry> entries = new ArrayList<SchemaEntry>();
       for (Integer id : getSchemaIds()) {
         String idStr = id.toString();
