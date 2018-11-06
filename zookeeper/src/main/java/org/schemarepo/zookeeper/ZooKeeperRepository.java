@@ -54,6 +54,7 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
    */
   private static final String LOCKFILE = ".repo.lock";
   private static final String SUBJECT_PROPERTIES = "subject.properties";
+  private static final String SUBJECT_ACTIVATE = "subject.activate";
   private static final String SCHEMA_IDS = "schema_ids";
   private static final String SCHEMA_POSTFIX = ".schema";
 
@@ -166,6 +167,9 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       props.store(sw, "Schema Repository Subject Properties");
       byte[] content = sw.toString().getBytes();
       zkClient.create().forPath(subjectName + "/" + SUBJECT_PROPERTIES, content);
+      // Create schema activate file
+      byte[] activated = new String("true").getBytes();
+      zkClient.create().forPath(subjectName + "/" + SUBJECT_ACTIVATE, activated);
     } catch (KeeperException.NodeExistsException e) {
       // The Subject was already created by another repository instance, we will
       // just fetch it, below, instead of creating a new one.
