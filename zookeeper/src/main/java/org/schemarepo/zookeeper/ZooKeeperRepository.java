@@ -368,7 +368,7 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
             logger.error("Got an invalid ID ({}) in {} !", line, getSchemaIdsFilePath(), e);
           }
         }
-
+        scanner.close();
         return schemaIdList;
       } catch (Exception e) {
         throw new RuntimeException("An exception occurred while accessing ZK!", e);
