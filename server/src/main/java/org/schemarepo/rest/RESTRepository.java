@@ -93,7 +93,7 @@ public class RESTRepository extends BaseRESTRepository {
   @Path("{subject}/all")
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response allSchemaEntries(@HeaderParam("Accept") String accept, @PathParam("subject") String subject) {
-    MessageAcknowledgement<List<SchemaEntry>> acknowledgement;
+    MessageAcknowledgement<String> acknowledgement;
     if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
       logger.error("Accept is not set correctly, Method: allSchemaEntries, subject: {}", subject);
       acknowledgement =
