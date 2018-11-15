@@ -96,4 +96,9 @@ public abstract class AbstractBackendRepository extends BaseRepository {
     isValid();
     return subjectCache.values();
   }
+
+  @Override
+  public boolean delete(String subjectName) {
+    return false;
+  }
 }

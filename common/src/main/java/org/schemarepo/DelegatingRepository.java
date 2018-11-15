@@ -42,6 +42,11 @@ public abstract class DelegatingRepository extends BaseRepository {
   }
 
   @Override
+  public boolean delete(String subjectName) {
+    return repo.delete(subjectName);
+  }
+
+  @Override
   public void close() throws IOException {
     repo.close();
   }

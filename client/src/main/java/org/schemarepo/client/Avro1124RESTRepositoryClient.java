@@ -26,14 +26,14 @@ import org.schemarepo.SubjectConfig;
 
 
 /**
- * An Implementation of {@link org.schemarepo.Repository} that connects to a
- * remote RESTRepository over HTTP.<br/>
+ * An Implementation of {@link org.schemarepo.Repository} that connects to a remote RESTRepository
+ * over HTTP.<br/>
  * <br/>
- * Typically, this is used in a client wrapped in a
- * {@link org.schemarepo.CacheRepository} to limit network communication.<br/>
+ * Typically, this is used in a client wrapped in a {@link org.schemarepo.CacheRepository} to limit
+ * network communication.<br/>
  * <br/>
- * Alternatively, this implementation can itself be what is used behind a
- * RESTRepository in a RepositoryServer, thus creating a caching proxy.
+ * Alternatively, this implementation can itself be what is used behind a RESTRepository in a
+ * RepositoryServer, thus creating a caching proxy.
  *
  * <b>Note:</b> This is the original implementation from
  * <a href='https://issues.apache.org/jira/browse/AVRO-1124'>AVRO-1124 issue</a>
@@ -90,6 +90,12 @@ public class Avro1124RESTRepositoryClient extends BaseRepository implements Repo
   @Override
   public String getStatus() {
     return webResource.path("status").get(String.class);
+  }
+
+  @Override
+  public boolean delete(String subjectName) {
+    // webResource.path(subjectName).delete(String.class);
+    return false;
   }
 
   private class RESTSubject extends Subject {

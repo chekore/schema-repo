@@ -40,14 +40,14 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * An Implementation of {@link org.schemarepo.Repository} that connects to a
- * remote RESTRepository over HTTP.<br/>
+ * An Implementation of {@link org.schemarepo.Repository} that connects to a remote RESTRepository
+ * over HTTP.<br/>
  * <br/>
- * Typically, this is used in a client wrapped in a
- * {@link org.schemarepo.CacheRepository} to limit network communication.<br/>
+ * Typically, this is used in a client wrapped in a {@link org.schemarepo.CacheRepository} to limit
+ * network communication.<br/>
  * <br/>
- * Alternatively, this implementation can itself be what is used behind a
- * RESTRepository in a RepositoryServer, thus creating a caching proxy.
+ * Alternatively, this implementation can itself be what is used behind a RESTRepository in a
+ * RepositoryServer, thus creating a caching proxy.
  *
  * <b>Note:</b>This implementation diverges from the original
  * <a href='https://issues.apache.org/jira/browse/AVRO-1124'>AVRO-1124 issue</a>
@@ -118,6 +118,11 @@ public class RESTRepositoryClient extends BaseRepository implements RepositoryCl
       handleException(e, "Failed to list all subjects", false);
     }
     return subjectList;
+  }
+
+  @Override
+  public boolean delete(String subjectName) {
+    return false;
   }
 
   @Override

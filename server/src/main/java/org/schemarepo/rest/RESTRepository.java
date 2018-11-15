@@ -169,7 +169,7 @@ public class RESTRepository extends BaseRESTRepository {
             StatusCodes.CREATED.getReasonPhrase(), created.getName());
         logger.info("Create the subject is successful. subject: {}", subject);
       } catch (Exception e) {
-        logger.error("Create the subject is failed. subject: {}, err: ", subject, e.getMessage());
+        logger.error("Create the subject is failed. subject: {}, err: {}", subject, e.getMessage());
         acknowledgement =
             new MessageAcknowledgement<>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
       }
@@ -194,13 +194,18 @@ public class RESTRepository extends BaseRESTRepository {
     } else {
       try {
         if (repo.delete(subject)) {
+          logger.info("Attempt to delete a Subject with the given name is successful, subject: {}", subject);
           acknowledgement = new MessageAcknowledgement<>(StatusCodes.NO_CONTENT.getStatusCode(),
               "Delete subject is successful.", subject);
         } else {
+          logger.info(
+              "Attempt to delete a Subject with the given name is not execution, the subject is not exist, subject: {}",
+              subject);
           acknowledgement =
               new MessageAcknowledgement<>(StatusCodes.NOT_FOUND.getStatusCode(), "The subject is not exist.", subject);
         }
       } catch (Exception e) {
+        logger.error("Delete the subject is failed. subject: {}, err: {}", subject, e.getMessage());
         acknowledgement =
             new MessageAcknowledgement<>(StatusCodes.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage(), subject);
       }
