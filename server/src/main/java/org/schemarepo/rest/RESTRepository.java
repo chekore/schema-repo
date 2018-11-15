@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -171,6 +172,37 @@ public class RESTRepository extends BaseRESTRepository {
         logger.error("Create the subject is failed. subject: {}, err: ", subject, e.getMessage());
         acknowledgement =
             new MessageAcknowledgement<>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
+      }
+    }
+    return Response.ok(acknowledgement).build();
+  }
+
+  @DELETE
+  @Path("{subject}")
+  @Consumes(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
+  @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
+  public Response deleteSubject(@HeaderParam("Accept") String accept, @PathParam("subject") String subject) {
+    MessageAcknowledgement<String> acknowledgement;
+    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
+      logger.error("Accept is not set correctly, Method: deleteSubject, subject: {}", subject);
+      acknowledgement =
+          new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
+    } else if (StringUtils.isAnyBlank(subject)) {
+      logger.error("Invalid Parameter Passed to function, Method: deleteSubject, subject: {}", subject);
+      acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+          StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
+    } else {
+      try {
+        if (repo.delete(subject)) {
+          acknowledgement = new MessageAcknowledgement<>(StatusCodes.NO_CONTENT.getStatusCode(),
+              "Delete subject is successful.", subject);
+        } else {
+          acknowledgement =
+              new MessageAcknowledgement<>(StatusCodes.NOT_FOUND.getStatusCode(), "The subject is not exist.", subject);
+        }
+      } catch (Exception e) {
+        acknowledgement =
+            new MessageAcknowledgement<>(StatusCodes.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage(), subject);
       }
     }
     return Response.ok(acknowledgement).build();
