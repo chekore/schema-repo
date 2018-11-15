@@ -1,6 +1,6 @@
 package org.schemarepo.config;
 
-//import io.swagger.jaxrs.config.BeanConfig;
+// import io.swagger.jaxrs.config.BeanConfig;
 import javax.servlet.ServletException;
 
 import com.google.inject.Singleton;
