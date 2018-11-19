@@ -159,8 +159,9 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       // Create properties file
       Properties props = new Properties();
       props.putAll(RepositoryUtil.safeConfig(config).asMap());
+      props.put("activated", "true");
       StringWriter sw = new StringWriter();
-      props.store(sw, "{\"activated\": true, \"doc\": \"Schema Repository Subject Properties}\"");
+      props.store(sw, "Schema Repository Subject Properties");
       byte[] content = sw.toString().getBytes();
       zkClient.create().forPath(subjectName + "/" + SUBJECT_PROPERTIES, content);
     } catch (KeeperException.NodeExistsException e) {
