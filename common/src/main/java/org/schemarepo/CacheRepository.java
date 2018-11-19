@@ -67,6 +67,15 @@ public class CacheRepository extends DelegatingRepository {
   }
 
   @Override
+  public boolean delete(String subjectName) {
+    if (repo.delete(subjectName)) {
+      return cache.remove(subjectName);
+    } else {
+      return false;
+    }
+  }
+
+  @Override
   protected Map<String, String> exposeConfiguration() {
     final Map<String, String> properties = new LinkedHashMap<String, String>(super.exposeConfiguration());
     properties.put("CACHE", repo.toString());
