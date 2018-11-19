@@ -17,8 +17,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.sun.jersey.api.NotFoundException;
-
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
