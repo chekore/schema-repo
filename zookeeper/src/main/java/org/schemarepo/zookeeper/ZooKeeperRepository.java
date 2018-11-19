@@ -231,6 +231,7 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
           });
         }
         zkClient.delete().forPath(subjectName);
+        subjectCache.remove(subjectName);
         return true;
       } catch (Exception e) {
         throw new RuntimeException("An exception occurred while accessing ZK!", e);
