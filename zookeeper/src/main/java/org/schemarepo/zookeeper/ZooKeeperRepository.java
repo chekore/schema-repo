@@ -215,15 +215,30 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
   @Override
   public boolean delete(String subjectName) {
     isValid();
-    try {
-      if (checkSubjectExistsInBackend(subjectName)) {
-        return zkClient.delete().forPath(subjectName) != null;
-      } else {
-        return false;
+    if (checkSubjectExistsInBackend(subjectName)) {
+      acquireLock();
+      try {
+        List<String> nodes = zkClient.getChildren().forPath(subjectName);
+        if (nodes.size() == 0) {
+          // nothing to do
+        } else {
+          nodes.forEach(node -> {
+            try {
+              zkClient.delete().forPath(subjectName + "/" + node);
+            } catch (Exception e) {
+              throw new RuntimeException("An exception occurred while accessing ZK!", e);
+            }
+          });
+        }
+        zkClient.delete().forPath(subjectName);
+        return true;
+      } catch (Exception e) {
+        throw new RuntimeException("An exception occurred while accessing ZK!", e);
+      } finally {
+        releaseLock();
       }
-    } catch (Exception e) {
-      logger.error("An exception occurred while accessing ZK!", e);
-      throw new RuntimeException(e);
+    } else {
+      return false;
     }
   }
 
@@ -456,7 +471,7 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
     /**
      * Delete the schema of registered with the given id
      *
-     * @param schemaId the id of the schema to delete
+     * @param schemaId the id of the schema to deletenodes =
      * @return
      */
     private synchronized boolean deleteSchemaById(String schemaId) {
@@ -534,6 +549,12 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       }
     }
 
+    /**
+     * Delete the schema of registered with the given id
+     * 
+     * @param schemaId
+     * @return true or false
+     */
     public boolean delete(String schemaId) {
       RepositoryUtil.validateSchemaOrSubject(schemaId);
       SchemaEntry entry = lookupBySchema(schemaId);
