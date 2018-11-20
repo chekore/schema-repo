@@ -121,8 +121,8 @@ public class RESTRepository extends BaseRESTRepository {
   /**
    * Query the config of a subject with the given name
    * 
-   * @param accept
-   * @param subject
+   * @param accept  the header
+   * @param subject the name of the subject
    * @return the subject config in a 200 response if successful.
    */
   @GET
