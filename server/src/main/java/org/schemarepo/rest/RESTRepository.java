@@ -145,6 +145,7 @@ public class RESTRepository extends BaseRESTRepository {
         acknowledgement = new MessageAcknowledgement<>(StatusCodes.NOT_FOUND.getStatusCode(),
             Message.SUBJECT_DOES_NOT_EXIST_ERROR, null);
       } else {
+        logger.info("Query the config of a subject with the given name is successful. subject: {}", subject);
         acknowledgement = new MessageAcknowledgement<>(StatusCodes.OK.getStatusCode(), StatusCodes.OK.getReasonPhrase(),
             s.getConfig().asMap());
       }
