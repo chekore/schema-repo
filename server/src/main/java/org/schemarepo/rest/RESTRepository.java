@@ -3,7 +3,6 @@ package org.schemarepo.rest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -119,16 +118,38 @@ public class RESTRepository extends BaseRESTRepository {
     return Response.ok(acknowledgement).build();
   }
 
+  /**
+   * Query the config of a subject with the given name
+   * 
+   * @param accept
+   * @param subject
+   * @return the subject config in a 200 response if successful.
+   */
   @GET
   @Path("{subject}/config")
-  public String subjectConfig(@HeaderParam("Accept") String mediaType, @PathParam("subject") String subject) {
-    Subject s = repo.lookup(subject);
-    if (null == s) {
-      throw new NotFoundException(Message.SUBJECT_DOES_NOT_EXIST_ERROR);
+  @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
+  public Response subjectConfig(@HeaderParam("Accept") String accept, @PathParam("subject") String subject) {
+    MessageAcknowledgement<Map<String, String>> acknowledgement;
+    if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
+      logger.error("Accept is not set correctly, Method: subjectConfig, subject: {}", subject);
+      acknowledgement =
+          new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
+    } else if (StringUtils.isAnyBlank(subject)) {
+      logger.error("Invalid Parameter Passed to function, Method: subjectConfig, subject: {}", subject);
+      acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
+          StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
+    } else {
+      Subject s = repo.lookup(subject);
+      if (null == s) {
+        logger.error("This subject does not exist, suject: {}", subject);
+        acknowledgement = new MessageAcknowledgement<>(StatusCodes.NOT_FOUND.getStatusCode(),
+            Message.SUBJECT_DOES_NOT_EXIST_ERROR, null);
+      } else {
+        acknowledgement = new MessageAcknowledgement<>(StatusCodes.OK.getStatusCode(), StatusCodes.OK.getReasonPhrase(),
+            s.getConfig().asMap());
+      }
     }
-    Properties props = new Properties();
-    props.putAll(s.getConfig().asMap());
-    return getRenderer(mediaType).renderProperties(props, "Configuration of subject " + subject);
+    return Response.ok(acknowledgement).build();
   }
 
   /**
