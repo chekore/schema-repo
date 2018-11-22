@@ -651,11 +651,15 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       if (cachedSchema != null) {
         return cachedSchema;
       } else {
-        String latestSchemaLiteral = readSchemaForId(latestId.toString());
-        if (latestSchemaLiteral == null) {
+        if (latestId == -1) {
           return null;
         } else {
-          return new SchemaEntry(latestId.toString(), latestSchemaLiteral);
+          String latestSchemaLiteral = readSchemaForId(latestId.toString());
+          if (latestSchemaLiteral == null) {
+            return null;
+          } else {
+            return new SchemaEntry(latestId.toString(), latestSchemaLiteral);
+          }
         }
       }
     }
