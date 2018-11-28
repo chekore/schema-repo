@@ -416,6 +416,15 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       return getLatestSchemaId(getSchemaIds());
     }
 
+    private boolean checkSchemaIdExists(String id) {
+      try {
+        return getSchemaIds().contains(Integer.valueOf(id));
+      } catch (NumberFormatException e) {
+        return false;
+      }
+
+    }
+
     private String readSchemaForId(String schemaId) {
       try {
         byte[] rawContent = zkClient.getData().forPath(getSchemaFilePath(schemaId));
@@ -625,9 +634,11 @@ public class ZooKeeperRepository extends AbstractBackendRepository {
       if (cachedSchema != null) {
         return cachedSchema;
       } else {
-        String schema = readSchemaForId(id);
-        if (schema != null) {
-          return new SchemaEntry(id, schema);
+        if (checkSchemaIdExists(id)) {
+          String schema = readSchemaForId(id);
+          if (schema != null) {
+            return new SchemaEntry(id, schema);
+          }
         }
         return null;
       }
