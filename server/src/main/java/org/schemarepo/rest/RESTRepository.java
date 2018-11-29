@@ -246,13 +246,23 @@ public class RESTRepository extends BaseRESTRepository {
   @Path("{subject}/latest")
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response latest(@HeaderParam("Accept") String accept, @PathParam("subject") String subject) {
+    MessageAcknowledgement<String> acknowledgement;
     if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
       logger.error("Accept is not set correctly, Method: latest, subject: {}", subject);
-      return Response.status(StatusCodes.INVALID_REQUEST).entity(Message.ACCEPT_ERROR).build();
+      acknowledgement =
+          new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
     } else {
-      logger.info("Get the latest schema for the subject is successful. subject: {}", subject);
-      return Response.ok(exists(getSubject(subject).latest())).build();
+      try {
+        SchemaEntry entry = exists(getSubject(subject).latest());
+        logger.info("Get the latest schema for the subject is successful. subject: {}", subject);
+        return Response.ok(entry).build();
+      } catch (Exception e) {
+        logger.error("Get the latest schema for the subject is failed, schema is not exist. subject: {}", subject);
+        acknowledgement = new MessageAcknowledgement<>(StatusCodes.NOT_FOUND.getStatusCode(),
+            Message.SCHEMA_DOES_NOT_EXIST_ERROR, null);
+      }
     }
+    return Response.ok(acknowledgement).build();
   }
 
   /**
@@ -268,12 +278,25 @@ public class RESTRepository extends BaseRESTRepository {
   @Produces(CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON)
   public Response schemaFromId(@HeaderParam("Accept") String accept, @PathParam("subject") String subject,
       @PathParam("id") String id) {
+    MessageAcknowledgement<String> acknowledgement;
     if (!CustomMediaType.APPLICATION_SCHEMA_REGISTRY_JSON.equalsIgnoreCase(accept)) {
       logger.error("Accept is not set correctly, Method: latest, subject: {}", subject);
-      return Response.status(StatusCodes.INVALID_REQUEST).entity(Message.ACCEPT_ERROR).build();
+      acknowledgement =
+          new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(), Message.ACCEPT_ERROR, null);
     } else {
-      return Response.ok(exists(getSubject(subject).lookupById(id))).build();
+      try {
+        SchemaEntry entry = exists(getSubject(subject).lookupById(id));
+        logger.info("Look up a schema by the schema id is successful. subject: {}, schema ids: {}", subject, id);
+        return Response.ok(entry).build();
+      } catch (Exception e) {
+        logger.error(
+            "Look up a schema by the schema id is failed, the schema is not exist. subject: {}, schema ids: {}",
+            subject, id);
+        acknowledgement = new MessageAcknowledgement<>(StatusCodes.NOT_FOUND.getStatusCode(),
+            Message.SCHEMA_DOES_NOT_EXIST_ERROR, null);
+      }
     }
+    return Response.ok(acknowledgement).build();
   }
 
   /**
