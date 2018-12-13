@@ -17,6 +17,7 @@ public enum StatusCodes implements Response.StatusType {
    * <li>403 Forbidden - [*]：表示用户得到授权（与401错误相对），但是访问是被禁止的</li>
    * <li>404 NOT FOUND - [*]：用户发出的请求针对的是不存在的记录，服务器没有进行操作，该操作是幂等的</li>
    * <li>406 Not Acceptable - [GET]：用户请求的格式不可得（比如用户请求JSON格式，但是只有XML格式）</li>
+   * <li>409 Conflict - [*]: 在响应中包含有冲突的信息</li>
    * <li>410 Gone - [GET]：用户请求的资源被永久删除，且不会再得到的</li>
    * <li>422 Unprocessable entity - [POST/PUT/PATCH]：当创建一个对象时，发生一个验证错误</li>
    * <li>500 INTERNAL SERVER ERROR - [*]：服务器发生错误，用户将无法判断发出的请求是否成功</li>
@@ -32,6 +33,7 @@ public enum StatusCodes implements Response.StatusType {
   FORBIDDEN(403, "Forbidden"),
   NOT_FOUND(404, "Not Found"),
   NOT_ACCEPTABLE(406, "Not Acceptable"),
+  CONFLICT(409, "Conflict"),
   GONE(410, "Gone"),
   UNPROCESSABLE_ENTITY(422, "Unprocessable Entity"),
   INTERNAL_SERVER_ERROR(500, "Internal Server Error");

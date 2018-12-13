@@ -186,10 +186,17 @@ public class RESTRepository extends BaseRESTRepository {
         }
       }
       try {
-        Subject created = repo.register(subject, builder.build());
-        acknowledgement = new MessageAcknowledgement<>(StatusCodes.CREATED.getStatusCode(),
-            StatusCodes.CREATED.getReasonPhrase(), created.getName());
-        logger.info("Create the subject is successful. subject: {}", subject);
+        Subject exist = repo.lookup(subject);
+        if (exist == null) {
+          Subject created = repo.register(subject, builder.build());
+          acknowledgement = new MessageAcknowledgement<>(StatusCodes.CREATED.getStatusCode(),
+              StatusCodes.CREATED.getReasonPhrase(), created.getName());
+          logger.info("Create the subject is successful. subject: {}", subject);
+        } else {
+          acknowledgement = new MessageAcknowledgement<>(StatusCodes.CONFLICT.getStatusCode(),
+              StatusCodes.CONFLICT.getReasonPhrase(), subject);
+          logger.info("Create the subject is successful. subject: {}", subject);
+        }
       } catch (Exception e) {
         logger.error("Create the subject is failed. subject: {}, err: {}", subject, e.getMessage());
         acknowledgement =
