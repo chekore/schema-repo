@@ -3,6 +3,8 @@ package org.schemarepo.rest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -178,29 +180,39 @@ public class RESTRepository extends BaseRESTRepository {
       acknowledgement = new MessageAcknowledgement<>(StatusCodes.INVALID_REQUEST.getStatusCode(),
           StatusCodes.INVALID_REQUEST.getReasonPhrase(), null);
     } else {
-      SubjectConfig.Builder builder = new SubjectConfig.Builder();
-      for (Map.Entry<String, List<String>> entry : configParams.entrySet()) {
-        List<String> val = entry.getValue();
-        if (val.size() > 0) {
-          builder.set(entry.getKey(), val.get(0));
+      String regEx = "^[A-Za-z0-9.]+$";
+      Pattern pattern = Pattern.compile(regEx);
+      Matcher matcher = pattern.matcher(subject);
+      if (matcher.matches()) {
+        SubjectConfig.Builder builder = new SubjectConfig.Builder();
+        for (Map.Entry<String, List<String>> entry : configParams.entrySet()) {
+          List<String> val = entry.getValue();
+          if (val.size() > 0) {
+            builder.set(entry.getKey(), val.get(0));
+          }
         }
-      }
-      try {
-        Subject exist = repo.lookup(subject);
-        if (exist == null) {
-          Subject created = repo.register(subject, builder.build());
-          acknowledgement = new MessageAcknowledgement<>(StatusCodes.CREATED.getStatusCode(),
-              StatusCodes.CREATED.getReasonPhrase(), created.getName());
-          logger.info("Create the subject is successful. subject: {}", subject);
-        } else {
-          acknowledgement = new MessageAcknowledgement<>(StatusCodes.CONFLICT.getStatusCode(),
-              StatusCodes.CONFLICT.getReasonPhrase(), subject);
-          logger.info("Create the subject is successful. subject: {}", subject);
+        try {
+          Subject exist = repo.lookup(subject);
+          if (exist == null) {
+            Subject created = repo.register(subject, builder.build());
+            acknowledgement = new MessageAcknowledgement<>(StatusCodes.CREATED.getStatusCode(),
+                StatusCodes.CREATED.getReasonPhrase(), created.getName());
+            logger.info("Create the subject is successful. subject: {}", subject);
+          } else {
+            acknowledgement = new MessageAcknowledgement<>(StatusCodes.CONFLICT.getStatusCode(),
+                StatusCodes.CONFLICT.getReasonPhrase(), subject);
+            logger.info("Create the subject is not executed, the subject is existed. subject: {}", subject);
+          }
+        } catch (Exception e) {
+          acknowledgement =
+              new MessageAcknowledgement<>(StatusCodes.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage(), subject);
+          logger.error("Create the subject is failed. subject: {}, err: {}", subject, e.getMessage());
         }
-      } catch (Exception e) {
-        logger.error("Create the subject is failed. subject: {}, err: {}", subject, e.getMessage());
-        acknowledgement =
-            new MessageAcknowledgement<>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(), e.getMessage(), null);
+      } else {
+        acknowledgement = new MessageAcknowledgement<>(StatusCodes.UNPROCESSABLE_ENTITY.getStatusCode(),
+            "The subject name is not conforming to naming rules, the rules ^[A-Za-z0-9.]+$", subject);
+        logger.info(
+            "Create the subject is not executed, the subject name can contain only letters, numbers, or the periods.");
       }
     }
     return Response.ok(acknowledgement).build();
